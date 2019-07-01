@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
@@ -29,8 +31,9 @@ import okhttp3.Response;
 public class ContentListActivity extends AppCompatActivity implements View.OnClickListener{
 
     private List<CategoryInfo> categoryInfos;
-    private ListView lv_content;
+    private RecyclerView rv_content;
     private ContentAdapter mAdapter;
+    private LinearLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +55,13 @@ public class ContentListActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initView() {
-        lv_content = findViewById(R.id.lv_content_list);
+        rv_content = findViewById(R.id.rv_content_list);
+        layoutManager=new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        rv_content.setLayoutManager(layoutManager);
         categoryInfos = new ArrayList<>();
-        mAdapter = new ContentAdapter(lv_content, this, categoryInfos);
-        lv_content.setAdapter(mAdapter);
+        mAdapter = new ContentAdapter(rv_content, this, categoryInfos);
+        rv_content.setAdapter(mAdapter);
     }
 
     private void getNeteData() {
