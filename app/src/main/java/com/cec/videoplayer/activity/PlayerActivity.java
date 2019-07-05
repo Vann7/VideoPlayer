@@ -85,7 +85,6 @@ public class PlayerActivity extends AppCompatActivity {
     private List<Relate> relateList;
     private List<Comment> commentList;
     private String id;
-    private String title;
     private String url;
 
     // 要申请的权限
@@ -98,10 +97,11 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.mContext = this;
         setContentView(R.layout.activity_player);
+        id = getIntent().getStringExtra("id");
         initView();
         initEvent();
         authority();
-        getNetData();
+        getNetData(id);
     }
 
 
@@ -119,13 +119,13 @@ public class PlayerActivity extends AppCompatActivity {
         String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
         player = new PlayerView(this)
-                .setTitle(title)
                 .setProcessDurationOrientation(PlayStateParams.PROCESS_PORTRAIT)
                 .setScaleType(PlayStateParams.fitparent)
                 .hideCenterPlayer(true)
                 .hideMenu(true)
                 .hideSteam(true)
-                .setPlaySource(url);
+                .setPlaySource(url)
+                .startPlay();
 
         //初始化相关视频lv
         lv_relate = findViewById(R.id.lv_relate);
@@ -160,11 +160,15 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void initEvent() {
 
+        //切换相关视频
         relAdapter.setOnListClickListener((relate, position) -> {
-            Intent intent = new Intent(PlayerActivity.this, PlayerActivity.class);
-            intent.putExtra("title", relateList.get(position).getTitle());
-            intent.putExtra("id", relateList.get(position).getId());
-            startActivity(intent);
+//            Intent intent = new Intent(PlayerActivity.this, PlayerActivity.class);
+//            intent.putExtra("title", relateList.get(position).getTitle());
+//            intent.putExtra("id", relateList.get(position).getId());
+//            startActivity(intent);
+
+            getNetData(relateList.get(position).getId());
+
         });
 
         comAdapter.setOnListClickListener((comment, position) -> {
@@ -184,9 +188,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     }
 
-    private void getNetData() {
-        id = getIntent().getStringExtra("id");
-        title = getIntent().getStringExtra("title");
+    private void getNetData(String id) {
+
         url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
                 "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
                 "contentId="+ id;
@@ -224,11 +227,14 @@ public class PlayerActivity extends AppCompatActivity {
 
         //子线程刷新UI
         PlayerActivity.this.runOnUiThread(() -> {
-            player.showThumbnail(ivThumbnail -> Glide.with(mContext)
+            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+            player.setPlaySource(url)
+                    .showThumbnail(ivThumbnail -> Glide.with(mContext)
                     .load(contentInfo.getImage())
                     .placeholder(R.color.cl_default)
                     .error(R.color.cl_error)
-                    .into(ivThumbnail));
+                    .into(ivThumbnail))
+                    .startPlay();
 //            String playUrl = contentInfo.getFiles().get(0).getPlayurl();
 //            player.setPlaySource(playUrl);
 
