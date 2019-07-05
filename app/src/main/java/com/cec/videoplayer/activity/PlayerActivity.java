@@ -9,7 +9,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.utlis.MediaUtils;
+import com.cec.videoplayer.utils.MediaUtils;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
 import com.dou361.ijkplayer.widget.PlayStateParams;
 import com.dou361.ijkplayer.widget.PlayerView;

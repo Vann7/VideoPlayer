@@ -1,4 +1,4 @@
-package com.cec.videoplayer.utlis;
+package com.cec.videoplayer.utils;
 
 import android.annotation.TargetApi;
 import android.content.Context;

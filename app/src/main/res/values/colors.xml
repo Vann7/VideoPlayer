@@ -5,4 +5,9 @@
     <color name="colorAccent">#FF4081</color>
     <color name="cl_default">#424242</color>
     <color name="cl_error">#ffffff</color>
+    <color name="ind_red">#B30E17</color>
+    <color name="blue_light">#00C0E4</color>
+    <color name="material_orange">#ffEF6C00</color>
+    <color name="searcher_border">#444343</color>
+    <color name="font_select">#1385af</color>
 </resources>
