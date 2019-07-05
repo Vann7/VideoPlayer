@@ -10,18 +10,100 @@
     <include
         layout="@layout/simple_player_view_player"
         android:layout_width="match_parent"
-        android:layout_height="380dp"/>
+        android:layout_weight="3"
+        android:layout_height="0dp"/>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="5"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1234564798789"/>
-    </LinearLayout>
+            android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp">
+                <TextView
+                    android:id="@+id/tv_content_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="25dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:textSize="18sp"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"/>
 
+                <TextView
+                    android:id="@+id/tv_content_hits"
+                    android:layout_width="wrap_content"
+                    android:layout_height="25dp"
+                    android:layout_below="@id/tv_content_title"
+                    android:paddingVertical="2dp"
+                    android:textSize="14sp"
+                    android:layout_marginLeft="10dp"/>
+
+                <TextView
+                    android:id="@+id/tv_content_updateTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="25dp"
+                    android:layout_below="@id/tv_content_title"
+                    android:layout_alignParentRight="true"
+                    android:paddingVertical="2dp"
+                    android:textSize="14sp"
+                    android:layout_marginRight="10dp"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/blue_touch_user"/>
+            </RelativeLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_content_files"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"/>
+            <View
+                android:id="@+id/line_file"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/rv_content_files"
+                android:background="@color/gray"/>
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/sv_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <com.cec.videoplayer.view.MyListView
+                    android:id="@+id/lv_relate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <View
+                    android:id="@+id/line_player"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_below="@+id/lv_relate"
+                    android:visibility="gone"
+                    android:background="@color/gray"/>
+
+                <!--评论待添加-->
+                <com.cec.videoplayer.view.MyListView
+                    android:id="@+id/lv_comment"
+                    android:layout_width="match_parent"
+                    android:visibility="gone"
+                    android:layout_height="400dp"/>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 </LinearLayout>

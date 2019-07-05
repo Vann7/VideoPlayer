@@ -1,5 +1,7 @@
 package com.cec.videoplayer;
 
+import com.cec.videoplayer.utlis.PlayHitstUtil;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -14,4 +16,13 @@ public class ExampleUnitTest {
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
     }
+
+
+    @Test
+    public void viewHits() {
+        int hits = 142314;
+        String result = PlayHitstUtil.getCount(hits);
+        assertEquals("14万次播放", result);
+    }
+
 }

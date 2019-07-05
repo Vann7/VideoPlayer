@@ -40,7 +40,26 @@ import java.util.List;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
-
+/**
+ * ========================================
+ * <p>
+ * 版 权：dou361.com 版权所有 （C） 2015
+ * <p>
+ * 作 者：陈冠明
+ * <p>
+ * 个人网站：http://www.dou361.com
+ * <p>
+ * 版 本：1.0
+ * <p>
+ * 创建日期：2016/4/14
+ * <p>
+ * 描 述：
+ * <p>
+ * <p>
+ * 修订历史：
+ * <p>
+ * ========================================
+ */
 public class PlayerView {
 
     /**
@@ -1651,7 +1670,8 @@ public class PlayerView {
                     } else {
                         int heightPixels = mActivity.getResources().getDisplayMetrics().heightPixels;
                         int widthPixels = mActivity.getResources().getDisplayMetrics().widthPixels;
-                        query.id(R.id.app_video_box).height(Math.min(heightPixels, widthPixels), false);
+                        int height = Math.min(heightPixels, widthPixels);
+                        query.id(R.id.app_video_box).height(height, false);
                     }
                     updateFullScreenButton();
                 }
@@ -1704,7 +1724,7 @@ public class PlayerView {
      * 隐藏状态界面
      */
     private void hideStatusUI() {
-//        iv_player.setVisibility(View.GONE);
+        iv_player.setVisibility(View.GONE);
         query.id(R.id.simple_player_settings_container).gone();
         query.id(R.id.simple_player_select_stream_container).gone();
         query.id(R.id.app_video_replay).gone();
