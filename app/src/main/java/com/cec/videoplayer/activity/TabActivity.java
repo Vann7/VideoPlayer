@@ -13,6 +13,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.LinearLayout;
@@ -58,9 +59,15 @@ public class TabActivity extends AppCompatActivity {
         setContentView(R.layout.tab_layout);
         tabLayout = findViewById(R.id.tablayout);
         vp_pager = findViewById(R.id.tab_viewpager);
+        EditText searchEditText = findViewById(R.id.fp_search);
+        searchEditText.setOnClickListener(v -> {
+            Intent intent = new Intent(TabActivity.this, SearchActivity.class);
+            startActivity(intent);
+        });
         getNeteData();
         initView();
     }
+
 
     private void initView() {
         tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
@@ -86,12 +93,11 @@ public class TabActivity extends AppCompatActivity {
             List<VideoInfo> videoList = null;
             LinearLayout layout = null;
             for (int i = 0; i < container.getChildCount(); ++i) {
-                layout = (LinearLayout)container.getChildAt(i);
+                layout = (LinearLayout) container.getChildAt(i);
                 if (layout.getChildAt(0).getId() == position) {
-                    gridView = (PullToRefreshGridView)layout.getChildAt(0);
+                    gridView = (PullToRefreshGridView) layout.getChildAt(0);
                     break;
-                }
-                else{
+                } else {
                     layout = null;
                 }
             }
@@ -107,26 +113,25 @@ public class TabActivity extends AppCompatActivity {
                 gridView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<GridView>() {
                     @Override
                     public void onPullDownToRefresh(PullToRefreshBase<GridView> refreshView) {
-                        ((VideoListAdapter)(refreshView.getRefreshableView().getAdapter())).clear();
-                        if(position != 0){
+                        ((VideoListAdapter) (refreshView.getRefreshableView().getAdapter())).clear();
+                        if (position != 0) {
                             getVideoListByCateId(mList.get(position).getId(), (PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
-                        }
-                        else{
+                        } else {
                             getVideoListBySiteId((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
                         }
                     }
+
                     @Override
                     public void onPullUpToRefresh(PullToRefreshBase<GridView> refreshView) {
-                        if(position != 0){
+                        if (position != 0) {
                             getVideoListByCateId(mList.get(position).getId(), (PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
-                        }
-                        else{
+                        } else {
                             getVideoListBySiteId((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
                         }
                     }
                 });
-                gridView.setOnItemClickListener((parent, v, positions, id) ->{
-                    VideoInfo videoInfo = (VideoInfo)parent.getAdapter().getItem(positions);
+                gridView.setOnItemClickListener((parent, v, positions, id) -> {
+                    VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
                     Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
                     playIntent.putExtra("id", videoInfo.getId());
                     startActivity(playIntent);
@@ -138,7 +143,7 @@ public class TabActivity extends AppCompatActivity {
                 layout.addView(gridView);
                 container.addView(layout);
             }
-            ((VideoListAdapter)gridView.getRefreshableView().getAdapter()).clear();
+            ((VideoListAdapter) gridView.getRefreshableView().getAdapter()).clear();
             if (position != 0) {
                 getVideoListByCateId(mList.get(position).getId(), gridView, (VideoListAdapter) gridView.getRefreshableView().getAdapter());
             } else {
@@ -160,6 +165,7 @@ public class TabActivity extends AppCompatActivity {
             view.getRefreshableView().setNumColumns(2);
             view.setMode(PullToRefreshBase.Mode.BOTH);
         }
+
         //根据栏目ID获取视频列表
         public void getVideoListByCateId(String cateId, PullToRefreshGridView gridView, VideoListAdapter adapter) {
             new Thread(() -> {
@@ -186,6 +192,7 @@ public class TabActivity extends AppCompatActivity {
                 });
             }).start();
         }
+
         //根据站点id获取视频列表
         public void getVideoListBySiteId(PullToRefreshGridView gridView, VideoListAdapter adapter) {
             new Thread(() -> {
@@ -212,12 +219,14 @@ public class TabActivity extends AppCompatActivity {
                 });
             }).start();
         }
+
         //将视频列表由json格式转换成类数组
         public void convertVideoFromJson(String json, PullToRefreshGridView gridView, VideoListAdapter adapter) {
             Gson gson = new Gson();
-            List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {}.getType());
+            List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {
+            }.getType());
             TabActivity.this.runOnUiThread(() -> {
-                for(int i = 0; i < videoInfoList.size(); ++i){
+                for (int i = 0; i < videoInfoList.size(); ++i) {
                     adapter.add(videoInfoList.get(i));
                 }
                 gridView.onRefreshComplete();

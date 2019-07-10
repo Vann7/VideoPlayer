@@ -48,12 +48,14 @@
                 <EditText
                     android:id="@+id/fp_search"
                     android:layout_width="match_parent"
-                    android:layout_height="25dp"
+                    android:layout_height="30dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
                     android:background="@null"
                     android:drawablePadding="5dp"
+                    android:clickable="true"
+                    android:focusable="false"
                     android:inputType="none"
                     android:singleLine="true"
                     android:textSize="15dp"></EditText>
@@ -82,13 +84,13 @@
             app:tabTextAppearance="@style/TabStyle"
             app:tabTextColor="@android:color/black" />
 
-        <ImageView
-            android:id="@+id/all_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:background="#E0E0E0"
-            android:src="@mipmap/ic_menu" />
+        <!--<ImageView-->
+            <!--android:id="@+id/all_menu"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentEnd="true"-->
+            <!--android:background="#E0E0E0"-->
+            <!--android:src="@mipmap/ic_menu" />-->
     </LinearLayout>
 
     <android.support.v4.view.ViewPager
