@@ -189,6 +189,7 @@ public class SimpleVrVideoActivity extends Activity  implements View.OnClickList
         // Bind input and output objects for the view.
         videoWidgetView = (VrVideoView) findViewById(R.id.video_view);
         videoWidgetView.setEventListener(new ActivityEventListener());
+
         volumeToggle = (ImageButton) findViewById(R.id.volume_toggle);
         volumeToggle.setOnClickListener(v -> setIsMuted(!isMuted));
         playToggle = findViewById(R.id.play_toggle);

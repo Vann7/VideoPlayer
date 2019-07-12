@@ -32,7 +32,9 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait" />
         <activity android:name=".activity.ContentListActivity" />
-        <activity android:name=".activity.SimpleVrVideoActivity"></activity>
+        <activity android:name=".activity.SimpleVrVideoActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>
