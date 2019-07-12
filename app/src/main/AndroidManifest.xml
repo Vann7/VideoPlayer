@@ -17,16 +17,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".activity.MainActivity">
+        <activity
+            android:name=".activity.MainActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="com.google.intent.category.CARDBOARD" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PlayerActivity"
+        <activity
+            android:name=".activity.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activity.ContentListActivity"/>
+            android:screenOrientation="portrait" />
+        <activity android:name=".activity.ContentListActivity" />
+        <activity android:name=".activity.SimpleVrVideoActivity"></activity>
     </application>
 
 </manifest>

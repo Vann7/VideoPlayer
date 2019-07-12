@@ -123,6 +123,14 @@
             android:visibility="gone"/>
     </LinearLayout>
 
+
+    <ImageView
+        android:id="@+id/app_video_danmu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:src="@drawable/danmukai"/>
+
     <TextView
         android:id="@+id/app_video_stream"
         android:layout_width="wrap_content"
@@ -132,7 +140,8 @@
         android:padding="8dp"
         android:text="标清"
         android:textColor="@android:color/white"
-        android:textSize="12dp"/>
+        android:textSize="12dp"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/ijk_iv_rotation"
