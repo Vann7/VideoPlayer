@@ -5,11 +5,11 @@ package com.cec.videoplayer.module;
  */
 public class CategoryInfo {
 
-   private String id;
-   private String uniqueStr;
-   private String parentId;
-   private String siteId;
-   private String name;
+    private String id;
+    private String uniqueStr;
+    private String parentId;
+    private String siteId;
+    private String name;
 
     public String getId() {
         return id;
@@ -48,6 +48,14 @@ public class CategoryInfo {
     }
 
     public void setName(String name) {
+        this.name = name;
+    }
+
+    public CategoryInfo(String id, String uniqueStr, String parentId, String siteId, String name) {
+        this.id = id;
+        this.uniqueStr = uniqueStr;
+        this.parentId = parentId;
+        this.siteId = siteId;
         this.name = name;
     }
 }

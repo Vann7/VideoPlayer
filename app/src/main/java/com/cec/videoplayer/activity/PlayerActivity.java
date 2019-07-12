@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.cec.videoplayer.R;
+
 import com.cec.videoplayer.adapter.CommentAdapter;
 import com.cec.videoplayer.adapter.ContentAdapter;
 import com.cec.videoplayer.adapter.FilesAdapter;
@@ -36,9 +37,9 @@ import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.module.Comment;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.Relate;
-import com.cec.videoplayer.utlis.MediaUtils;
-import com.cec.videoplayer.utlis.PlayHitstUtil;
-import com.cec.videoplayer.utlis.ToastUtils;
+import com.cec.videoplayer.utils.MediaUtils;
+import com.cec.videoplayer.utils.PlayHitstUtil;
+import com.cec.videoplayer.utils.ToastUtils;
 import com.cec.videoplayer.view.MyListView;
 import com.dou361.ijkplayer.bean.VideoijkBean;
 import com.dou361.ijkplayer.listener.OnShowThumbnailListener;
