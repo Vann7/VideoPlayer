@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.cec.videoplayer.R;
-
+import com.cec.videoplayer.service.NetService;
 import com.cec.videoplayer.adapter.CommentAdapter;
 import com.cec.videoplayer.adapter.ContentAdapter;
 import com.cec.videoplayer.adapter.FilesAdapter;
@@ -85,12 +85,13 @@ public class PlayerActivity extends AppCompatActivity {
     private ContentInfo contentInfo;
     private List<Relate> relateList;
     private List<Comment> commentList;
+    private String playUrl;
     private String id;
     private String url;
 
     // 要申请的权限
-    private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
-
+    private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+    private NetService netService = new NetService();
 
 
     @Override
@@ -98,13 +99,14 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.mContext = this;
         setContentView(R.layout.activity_player);
-        id = getIntent().getStringExtra("id");
+        Bundle bundle = this.getIntent().getExtras();
+        id = bundle.getString("id");
+        playUrl = getIntent().getStringExtra("url");
         initView();
         initEvent();
         authority();
         getNetData(id);
     }
-
 
 
     @SuppressLint("InvalidWakeLockTag")
@@ -115,7 +117,8 @@ public class PlayerActivity extends AppCompatActivity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+//        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+        String url = playUrl;
         String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
         String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
@@ -147,7 +150,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         //初始化视频剧集rv
         rv_content_files = findViewById(R.id.rv_content_files);
-        layoutManager=new LinearLayoutManager(this);
+        layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         rv_content_files.setLayoutManager(layoutManager);
         List<com.cec.videoplayer.module.File> files = new ArrayList<>();
@@ -178,12 +181,12 @@ public class PlayerActivity extends AppCompatActivity {
 
         //切换剧集
         mAdapter.setOnListClickListener((v, position) -> {
-             contentInfo.getFiles().get(position).getPlayurl();
+            contentInfo.getFiles().get(position).getPlayurl();
 
             String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
             String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
-            player.setPlaySource((position == 0) ? h264 : h265 )
+            player.setPlaySource((position == 0) ? h264 : h265)
                     .startPlay();
         });
 
@@ -193,7 +196,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
                 "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
-                "contentId="+ id;
+                "contentId=" + id;
 
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
@@ -212,7 +215,7 @@ public class PlayerActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     response = client.newCall(request).execute();
-                    String json =  response.body().string();
+                    String json = response.body().string();
                     initModel(json);
                 }
             });
@@ -221,20 +224,22 @@ public class PlayerActivity extends AppCompatActivity {
 
     public void initModel(String json) {
         Gson gson = new Gson();
-        List<ContentInfo> infos = gson.fromJson(json,new TypeToken<List<ContentInfo>>() {}.getType());
+        List<ContentInfo> infos = gson.fromJson(json, new TypeToken<List<ContentInfo>>() {
+        }.getType());
 
         contentInfo = infos.get(0);
         relateList = infos.get(1).getRelates();
 
         //子线程刷新UI
         PlayerActivity.this.runOnUiThread(() -> {
-            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+//            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+            String url = playUrl;
             player.setPlaySource(url)
                     .showThumbnail(ivThumbnail -> Glide.with(mContext)
-                    .load(contentInfo.getImage())
-                    .placeholder(R.color.cl_default)
-                    .error(R.color.cl_error)
-                    .into(ivThumbnail))
+                            .load(contentInfo.getImage())
+                            .placeholder(R.color.cl_default)
+                            .error(R.color.cl_error)
+                            .into(ivThumbnail))
                     .startPlay();
 //            String playUrl = contentInfo.getFiles().get(0).getPlayurl();
 //            player.setPlaySource(playUrl);
@@ -243,7 +248,7 @@ public class PlayerActivity extends AppCompatActivity {
 
             tv_title.setText(contentInfo.getTitle());
             tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
-            tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
+            tv_updateTime.setText(contentInfo.getUpdateTime() + "发布");
 
             if (contentInfo.getFiles().size() > 1) {
                 rv_content_files.setVisibility(View.VISIBLE);
@@ -268,9 +273,6 @@ public class PlayerActivity extends AppCompatActivity {
         String uri = sdCard + File.separator + name;
         return uri;
     }
-
-
-
 
 
     @Override
@@ -328,14 +330,14 @@ public class PlayerActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //先判断有没有权限 ，没有就在这里进行权限的申请
             ActivityCompat.requestPermissions(this,
-                    permissions,321);
+                    permissions, 321);
             if (ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED ||
+                    android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
 //                ContextCompat.checkSelfPermission(this,
 //                    Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED ||
                     ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED
-                    ) {
+                            Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            ) {
                 // 开始提交摄像头、存储请求权限
                 ActivityCompat.requestPermissions(this, permissions, 321);
             }

@@ -1,6 +1,7 @@
 package com.cec.videoplayer.activity;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,13 +26,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onResume() {
+        /**
+         * 设置为竖屏
+         */
+        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+        super.onResume();
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.player :
+            case R.id.player:
                 Intent intent = new Intent(MainActivity.this, TabActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.player2 :
+            case R.id.player2:
                 Intent intent2 = new Intent(MainActivity.this, PlayerActivity.class);
                 intent2.putExtra("id", "f39c5711667f95430166a9cc32ea0114");
                 startActivity(intent2);

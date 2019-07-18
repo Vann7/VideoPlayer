@@ -8,30 +8,31 @@
     <LinearLayout
         android:id="@+id/search_block"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_marginLeft="5dp"
+        android:layout_height="60dp"
         android:orientation="horizontal"
-        android:paddingRight="10dp">
+        android:paddingRight="10dp"
+        android:background="@drawable/background_gradient">
 
         <ImageView
             android:id="@+id/user_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="7dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="29dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/image_view_border"
+            android:layout_marginLeft="10dp"
             android:src="@mipmap/user" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/shape_corner"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
@@ -73,16 +74,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="#E0E0E0"
-            app:tabIndicatorColor="@color/ind_red"
-            app:tabIndicatorHeight="2dp"
+            android:background="@drawable/background_gradient"
+            app:tabIndicatorColor="@color/limegreen"
+            app:tabIndicatorHeight="4dp"
             app:tabMinWidth="0dp"
             app:tabMode="fixed"
             app:tabPaddingEnd="20dp"
             app:tabPaddingStart="20dp"
-            app:tabSelectedTextColor="@color/material_orange"
+            app:tabSelectedTextColor="@color/limegreen"
             app:tabTextAppearance="@style/TabStyle"
-            app:tabTextColor="@android:color/black" />
+            app:tabTextColor="#59FFFFFF" />
 
         <!--<ImageView-->
             <!--android:id="@+id/all_menu"-->
