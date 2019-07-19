@@ -135,4 +135,5 @@ public class ContentInfo {
     public void setRelates(List<Relate> relates) {
         this.relates = relates;
     }
+
 }

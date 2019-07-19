@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.player2 :
                 Intent intent2 = new Intent(MainActivity.this, PlayerActivity.class);
-                intent2.putExtra("id", "f39c5711667f95430166a9cc32ea0114");
+                intent2.putExtra("id", "f39c5711636e36130163710ba0c701e8");
                 startActivity(intent2);
                 break;
             case R.id.vr_player :

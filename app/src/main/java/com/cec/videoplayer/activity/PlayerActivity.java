@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.cec.videoplayer.R;
@@ -144,7 +145,6 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
         String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
         String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
@@ -153,10 +153,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 .setScaleType(PlayStateParams.fitparent)
                 .hideCenterPlayer(true)
                 .hideMenu(true)
-                .hideSteam(true)
-                .setPlaySource(url)
-                .startPlay();
-
+                .hideSteam(true);
 
         //初始化相关视频lv
         rl_player = findViewById(R.id.rl_player);
@@ -287,35 +284,41 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         contentInfo = infos.get(0);
         relateList = infos.get(1).getRelates();
-
-        //子线程刷新UI
-        PlayerActivity.this.runOnUiThread(() -> {
-            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
-            player.setPlaySource(url)
-                    .showThumbnail(ivThumbnail -> Glide.with(mContext)
-                    .load(contentInfo.getImage())
-                    .placeholder(R.color.cl_default)
-                    .error(R.color.cl_error)
-                    .into(ivThumbnail))
-                    .startPlay();
+        if (contentInfo.getFiles().size() > 0) {
+            //子线程刷新UI
+            PlayerActivity.this.runOnUiThread(() -> {
+                String url = contentInfo.getFiles().get(0).getPlayurl();
+//            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+//            String url = "http://115.28.215.145:3880/D:/mediaupload/602f134a2548423786b861830607ca46.mp41.mp4";
+                player.setPlaySource(url)
+                        .showThumbnail(ivThumbnail -> Glide.with(mContext)
+                                .load(contentInfo.getImage())
+                                .placeholder(R.color.cl_default)
+                                .error(R.color.cl_error)
+                                .into(ivThumbnail))
+                        .startPlay();
 //            String playUrl = contentInfo.getFiles().get(0).getPlayurl();
 //            player.setPlaySource(playUrl);
 
-            relAdapter.onDateChange(relateList);
+                relAdapter.onDateChange(relateList);
 
-            tv_title.setText(contentInfo.getTitle());
-            tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
-            tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
+                tv_title.setText(contentInfo.getTitle());
+                tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
+                tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
 
-            if (contentInfo.getFiles().size() > 1) {
-                rv_content_files.setVisibility(View.VISIBLE);
-                view_file.setVisibility(View.VISIBLE);
-                mAdapter.onDateChange(contentInfo.getFiles());
-            } else {
-                rv_content_files.setVisibility(View.GONE);
-                view_file.setVisibility(View.GONE);
-            }
-        });
+                if (contentInfo.getFiles().size() > 1) {
+                    rv_content_files.setVisibility(View.VISIBLE);
+                    view_file.setVisibility(View.VISIBLE);
+                    mAdapter.onDateChange(contentInfo.getFiles());
+                } else {
+                    rv_content_files.setVisibility(View.GONE);
+                    view_file.setVisibility(View.GONE);
+                }
+            });
+        } else {
+            ToastUtils.showLong("无播放文件!");
+        }
+
     }
 
 

@@ -23,7 +23,7 @@ import com.cec.videoplayer.R;
 import com.cec.videoplayer.adapter.RelateAdapter;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.Relate;
-import com.cec.videoplayer.utlis.PlayHitstUtil;
+import com.cec.videoplayer.utils.PlayHitstUtil;
 import com.cec.videoplayer.utlis.TimeFormatUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
