@@ -1,6 +1,6 @@
 package com.cec.videoplayer;
 
-import com.cec.videoplayer.utlis.PlayHitstUtil;
+import com.cec.videoplayer.utils.PlayHitstUtil;
 
 import org.junit.Test;
 

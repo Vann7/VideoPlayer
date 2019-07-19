@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.module.CategoryInfo;
+import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.VideoInfo;
 import com.cec.videoplayer.service.NetService;
 import com.google.gson.Gson;
@@ -55,7 +56,7 @@ public class TabActivity extends AppCompatActivity {
     private List<CategoryInfo> mList = new ArrayList<>();
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
     private NetService netService = new NetService();
-
+    private ContentInfo contentInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -160,12 +161,48 @@ public class TabActivity extends AppCompatActivity {
                 });
                 gridView.setOnItemClickListener((parent, v, positions, id) -> {
                     VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
-                    Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("url", videoInfo.getPlayurl());
-                    bundle.putString("id", videoInfo.getId());
-                    playIntent.putExtras(bundle);
-                    startActivity(playIntent);
+                    String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
+                            "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                            "contentId=" + videoInfo.getId();
+
+                    new Thread(() -> {
+                        OkHttpClient client = new OkHttpClient();
+                        final Request request = new Request.Builder()
+                                .url(url)
+                                .get()
+                                .build();
+
+                        //异步加载
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.d("load", "onFailure: ");
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                response = client.newCall(request).execute();
+                                String json = response.body().string();
+                                Gson gson = new Gson();
+                                List<ContentInfo> infos = gson.fromJson(json,new TypeToken<List<ContentInfo>>() {}.getType());
+                                contentInfo=infos.get(0);
+                                if(contentInfo.getVideo360()==1){
+                                    Intent playIntent = new Intent(TabActivity.this, SimpleVrVideoActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("id", contentInfo.getId());
+                                    playIntent.putExtras(bundle);
+                                    startActivity(playIntent);
+                                }else{
+                                    Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("url", videoInfo.getPlayurl());
+                                    bundle.putString("id", videoInfo.getId());
+                                    playIntent.putExtras(bundle);
+                                    startActivity(playIntent);
+                                }
+                            }
+                        });
+                    }).start();
                 });
                 videoList = new ArrayList<VideoInfo>();
                 videoListAdapter = new VideoListAdapter(TabActivity.this, R.layout.video_item, videoList);

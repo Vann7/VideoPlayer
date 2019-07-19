@@ -73,7 +73,7 @@ public class PlayerView {
     /**
      * 依附的容器Activity
      */
-    private final Activity mActivity;
+    public final Activity mActivity;
     /**
      * Activity界面的中布局的查询器
      */
@@ -81,7 +81,7 @@ public class PlayerView {
     /**
      * 原生的Ijkplayer
      */
-    private final IjkVideoView videoView;
+    public final IjkVideoView videoView;
     /**
      * 播放器整个界面
      */
@@ -113,7 +113,7 @@ public class PlayerView {
     /**
      * 视频bottonbar的播放按钮
      */
-    private final ImageView iv_bar_player;
+    protected final ImageView iv_bar_player;
     /**
      * 视频中间的播放按钮
      */
@@ -121,7 +121,7 @@ public class PlayerView {
     /**
      * 视频全屏按钮
      */
-    private final ImageView iv_fullscreen;
+    public final ImageView iv_fullscreen;
     /**
      * 菜单面板
      */
@@ -174,7 +174,7 @@ public class PlayerView {
     /**
      * 当前状态
      */
-    private int status = PlayStateParams.STATE_IDLE;
+    public int status = PlayStateParams.STATE_IDLE;
     /**
      * 当前播放位置
      */
@@ -238,7 +238,7 @@ public class PlayerView {
     /**
      * 是否是直播 默认为非直播，true为直播false为点播，根据isLive()方法前缀rtmp或者后缀.m3u8判断得出的为直播，比较片面，有好的建议欢迎交流
      */
-    private boolean isLive;
+    public boolean isLive;
     /**
      * 是否显示控制面板，默认为隐藏，true为显示false为隐藏
      */
@@ -281,7 +281,7 @@ public class PlayerView {
     /**
      * 是否是竖屏，默认为竖屏，true为竖屏，false为横屏
      */
-    private boolean isPortrait = true;
+    public boolean isPortrait = true;
     /**
      * 是否隐藏中间播放按钮，默认不隐藏，true为隐藏，false为不隐藏
      */
@@ -383,7 +383,7 @@ public class PlayerView {
     /**
      * 视频的返回键监听
      */
-    private OnPlayerBackListener mPlayerBack;
+    public OnPlayerBackListener mPlayerBack;
     /**
      * 视频播放时信息回调
      */
@@ -407,7 +407,7 @@ public class PlayerView {
             } else if (v.getId() == R.id.app_video_fullscreen) {
                 /**视频全屏切换*/
                 toggleFullScreen();
-            } else if (v.getId() == R.id.app_video_play || v.getId() == R.id.play_icon) {
+            } else if ( v.getId() == R.id.play_icon) {
                 /**视频播放和暂停*/
                 if (videoView.isPlaying()) {
                     if (isLive) {
@@ -669,7 +669,7 @@ public class PlayerView {
         seekBar.setOnSeekBarChangeListener(mSeekListener);
         iv_bar_player.setOnClickListener(onClickListener);
         iv_player.setOnClickListener(onClickListener);
-        iv_fullscreen.setOnClickListener(onClickListener);
+//        iv_fullscreen.setOnClickListener(onClickListener);
         iv_rotation.setOnClickListener(onClickListener);
         tv_steam.setOnClickListener(onClickListener);
         iv_back.setOnClickListener(onClickListener);
@@ -1723,7 +1723,7 @@ public class PlayerView {
     /**
      * 隐藏状态界面
      */
-    private void hideStatusUI() {
+    public void hideStatusUI() {
         iv_player.setVisibility(View.GONE);
         query.id(R.id.simple_player_settings_container).gone();
         query.id(R.id.simple_player_select_stream_container).gone();
@@ -1850,7 +1850,7 @@ public class PlayerView {
     /**
      * 更新播放、暂停和停止按钮
      */
-    private void updatePausePlay() {
+    public void updatePausePlay() {
         if (videoView.isPlaying()) {
             if (isLive) {
                 iv_bar_player.setImageResource(R.drawable.simple_player_stop_white_24dp);
@@ -1867,7 +1867,7 @@ public class PlayerView {
     /**
      * 更新全屏和半屏按钮
      */
-    private void updateFullScreenButton() {
+    public void updateFullScreenButton() {
         if (getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             iv_fullscreen.setImageResource(R.drawable.simple_player_icon_fullscreen_shrink);
         } else {
@@ -2036,9 +2036,9 @@ public class PlayerView {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             /**视频视窗双击事件*/
-            if (!isForbidTouch && !isOnlyFullScreen && !isForbidDoulbeUp) {
-                toggleFullScreen();
-            }
+//            if (!isForbidTouch && !isOnlyFullScreen && !isForbidDoulbeUp) {
+//                toggleFullScreen();
+//            }
             return true;
         }
 
