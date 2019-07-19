@@ -1,4 +1,4 @@
-package com.cec.videoplayer.utlis;
+package com.cec.videoplayer.utils;
 
 /**
  * User: cec

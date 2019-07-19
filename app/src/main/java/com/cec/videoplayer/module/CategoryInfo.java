@@ -1,9 +1,13 @@
 package com.cec.videoplayer.module;
 
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * 栏目信息
  */
-public class CategoryInfo {
+public class CategoryInfo implements Parcelable {
 
     private String id;
     private String uniqueStr;
@@ -58,4 +62,38 @@ public class CategoryInfo {
         this.siteId = siteId;
         this.name = name;
     }
+
+    @Override
+    public int describeContents() {
+// TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int arg1) {
+// TODO Auto-generated method stub
+        parcel.writeString(id);
+        parcel.writeString(uniqueStr);
+        parcel.writeString(parentId);
+        parcel.writeString(siteId);
+        parcel.writeString(name);
+    }
+
+    public static final Parcelable.Creator<CategoryInfo> CREATOR = new Creator<CategoryInfo>() {
+        public CategoryInfo createFromParcel(Parcel source) {
+            CategoryInfo pTemp = new CategoryInfo("", "", "", "", "");
+
+            pTemp.id = source.readString();
+            pTemp.uniqueStr = source.readString();
+            pTemp.parentId = source.readString();
+            pTemp.siteId = source.readString();
+            pTemp.name = source.readString();
+
+            return pTemp;
+        }
+
+        public CategoryInfo[] newArray(int size) {
+            return new CategoryInfo[size];
+        }
+    };
 }

@@ -24,7 +24,7 @@ import com.cec.videoplayer.adapter.RelateAdapter;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.Relate;
 import com.cec.videoplayer.utils.PlayHitstUtil;
-import com.cec.videoplayer.utlis.TimeFormatUtil;
+import com.cec.videoplayer.utils.TimeFormatUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.vr.sdk.widgets.video.VrVideoEventListener;

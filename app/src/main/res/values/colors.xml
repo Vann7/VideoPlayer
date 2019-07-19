@@ -11,9 +11,11 @@
     <color name="searcher_border">#444343</color>
 
     <!--程序自定义颜色   _user 结尾-->
+    <color name="left_top">#0C3131</color>
+    <color name="right_bottom">#459477</color>
     <color name="blue_user">#0071BC</color><!--主色蓝 -->
     <color name="blue_user_press">#075487</color><!--主色蓝 -->
-    <color name="blue_touch_user">#B3B3B3</color><!--主色 按住蓝 -->
+    <color name="blue_touch_user">#9C9B9B</color><!--主色 按住蓝 -->
     <color name="background_user">#F2F2F2</color><!--主色 按住蓝 -->
     <color name="black_user">#333333</color><!--主色  -->
     <color name="title_user">#2deeff</color>
@@ -41,6 +43,7 @@
     <color name="transparent">#00000000</color>
     <color name="progress_bg">#a02b5283</color>
     <color name="bg_cover">#96323b46</color>
+    <color name="status_bar">#ffffff</color>
 
     <!--常用颜色定义 -->
     <color name="white">#FFFFFF</color><!--白色 -->

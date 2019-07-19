@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +19,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.widget.Toast;
 
 import com.tangguna.searchbox.library.R;
-import com.tangguna.searchbox.library.adapter.HistoryDataAdapter;
 import com.tangguna.searchbox.library.adapter.HistoryDataListViewAdapter;
-import com.tangguna.searchbox.library.cache.HistoryCache;
 import com.tangguna.searchbox.library.callback.onSearchCallBackListener;
 
 import java.util.ArrayList;
@@ -42,6 +44,11 @@ public class SearchListLayout extends LinearLayout {
     private LinearLayout ll_clear;
     private Button bt_text_search_back;
     private TextView tvclearolddata;
+
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private LinearLayout linearLayout;
+    private LinearLayout linearLayout2;
     //历史搜索
     private SelfSearchListView gridViewData;
     private HistoryDataListViewAdapter historyDataAdapter;
@@ -65,7 +72,7 @@ public class SearchListLayout extends LinearLayout {
 
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.searchmlist);
         msearch_hint = array.getString(R.styleable.searchmlist_search_hint);
-        msearch_baground = array.getResourceId(R.styleable.searchmlist_search_baground, R.drawable.search_baground_shap);
+        msearch_baground = array.getResourceId(R.styleable.searchmlist_search_baground, R.drawable.search_background_shape);
         array.recycle();
         initView();
     }
@@ -97,6 +104,11 @@ public class SearchListLayout extends LinearLayout {
         gridViewData.setSelector(new ColorDrawable(Color.TRANSPARENT));//去除背景点击效果
 
 // +++++热门搜索+++++       hotflowLayout =  (FlowLayout)searchview.findViewById(R.id.id_flowlayouthot);
+
+        tabLayout = findViewById(R.id.search_tablayout);
+        viewPager = findViewById(R.id.search_tab_viewpager);
+        linearLayout = findViewById(R.id.history_list);
+        linearLayout2=findViewById(R.id.no_search_result);
         setLinstener();
     }
 
@@ -123,6 +135,10 @@ public class SearchListLayout extends LinearLayout {
                 bt_text_search_back.setText(searchtitle);
             } else {
                 ib_searchtext_delete.setVisibility(View.GONE);
+                tabLayout.setVisibility(View.GONE);
+                viewPager.setVisibility(View.GONE);
+                linearLayout.setVisibility(View.VISIBLE);
+                linearLayout2.setVisibility(View.GONE);
                 bt_text_search_back.setText(backtitle);
             }
         }
@@ -166,7 +182,6 @@ public class SearchListLayout extends LinearLayout {
                     executeSearch_and_NotifyDataSetChanged(searchtext);
 
 
-
                     return true;
                 }
                 return false;
@@ -182,8 +197,6 @@ public class SearchListLayout extends LinearLayout {
                     //*********搜索按钮响应*********
 //                    Toast.makeText(context, "点击button搜索" + searchtext, Toast.LENGTH_SHORT).show();
                     executeSearch_and_NotifyDataSetChanged(searchtext);
-
-
 
 
                 } else {
@@ -211,7 +224,7 @@ public class SearchListLayout extends LinearLayout {
             @Override
             public void onClick(View v) {
                 String string = ((TextView) v).getText().toString();
-//              Toast.makeText(context, "Item点击"+string, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "Item点击" + string, Toast.LENGTH_SHORT).show();
                 executeSearch_and_NotifyDataSetChanged(string);
 
             }
@@ -225,6 +238,8 @@ public class SearchListLayout extends LinearLayout {
                     et_searchtext_search.setText(historyList.get(position).trim());
                     et_searchtext_search.setCursorVisible(false);
                     et_searchtext_search.setSelection(et_searchtext_search.getText().toString().length());
+                    String str=et_searchtext_search.getText().toString();
+                    executeSearch_and_NotifyDataSetChanged(str);
                     //点击项移动到首部位
                     swap(historyList, position, 0);
                     historyDataAdapter.notifyDataSetChanged();
@@ -237,7 +252,7 @@ public class SearchListLayout extends LinearLayout {
 
     /**
      * @param olddatalist 历史搜索数据集合
-     * @param hotdata     热门搜索数据集合
+//     * @param hotdata     热门搜索数据集合
      * @param sCb         事件处理监听
      * @param styleId     热门搜索样式(值在1到5之间) 可以在drawable下修改、添加 sousuo_bg_gray_X等样式背景
      */
@@ -267,7 +282,6 @@ public class SearchListLayout extends LinearLayout {
 //            return;
 //        }
 //    }
-
     public void initData(@Nullable List<String> olddatalist, onSearchCallBackListener sCb, int styleId) {
         SetCallBackListener(sCb);
 //        hotflowLayout.removeAllViews();
@@ -302,6 +316,8 @@ public class SearchListLayout extends LinearLayout {
                     sCBlistener.SaveOldData(historyList);
                 }
             }
+            viewPager.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.GONE);
             ll_clear.setVisibility(VISIBLE);
             et_searchtext_search.setText(str);
             sCBlistener.Search(str);

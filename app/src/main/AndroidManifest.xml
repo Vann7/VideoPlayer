@@ -17,9 +17,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
+        <!-- <activity -->
+        <!-- android:name=".activity.MainActivity" -->
+        <!-- android:launchMode="singleTask"> -->
+
         <activity
-            android:name=".activity.MainActivity"
-            android:launchMode="singleTask">
+            android:name=".activity.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.StartingWindowTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,20 +33,32 @@
                 <category android:name="com.google.intent.category.CARDBOARD" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".activity.TabActivity"/>
-        <activity android:name=".activity.SearchActivity"/>
-        <activity android:name=".activity.SearchResultActivity"/>
-
+        <activity
+            android:name=".activity.TabActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.SearchActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.SearchResultActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.NoNetworkActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"/>
-        <!--<activity android:name=".activity.ContentListActivity"/>-->
+            android:screenOrientation="portrait" />
+        <!-- <activity android:name=".activity.ContentListActivity"/> -->
 
-        <activity android:name=".activity.SimpleVrVideoActivity"
+        <activity
+            android:name=".activity.SimpleVrVideoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+        <activity android:name=".activity.P2PActivity"></activity>
     </application>
 
 </manifest>

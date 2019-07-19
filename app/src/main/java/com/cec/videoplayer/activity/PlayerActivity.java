@@ -213,13 +213,14 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         //切换剧集
         mAdapter.setOnListClickListener((v, position) -> {
-             contentInfo.getFiles().get(position).getPlayurl();
+             player.setPlaySource(contentInfo.getFiles().get(position).getPlayurl())
+                    .startPlay();
 
-            String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
+           /* String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
             String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
             player.setPlaySource((position == 0) ? h264 : h265 )
-                    .startPlay();
+                    .startPlay();*/
         });
 
 
