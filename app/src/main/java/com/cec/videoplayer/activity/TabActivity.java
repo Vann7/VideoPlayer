@@ -1,7 +1,9 @@
 package com.cec.videoplayer.activity;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -13,14 +15,18 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.module.CategoryInfo;
+import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.VideoInfo;
+import com.cec.videoplayer.service.NetService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
@@ -49,17 +55,47 @@ public class TabActivity extends AppCompatActivity {
     private List<CategoryInfo> categoryInfos = new ArrayList<>();
     private List<CategoryInfo> mList = new ArrayList<>();
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
-
+    private NetService netService = new NetService();
+    private ContentInfo contentInfo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.tab_layout);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            View decorView = getWindow().getDecorView();
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(option);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
         tabLayout = findViewById(R.id.tablayout);
         vp_pager = findViewById(R.id.tab_viewpager);
-        getNeteData();
+        ImageView userLogin = findViewById(R.id.user_msg);
+        userLogin.setOnClickListener(v -> {
+            Intent intent1 = new Intent(TabActivity.this, LoginActivity.class);
+            startActivity(intent1);
+        });
+        EditText searchEditText = findViewById(R.id.fp_search);
+        searchEditText.setOnClickListener(v -> {
+            Intent intent2 = new Intent(TabActivity.this, SearchActivity.class);
+            startActivity(intent2);
+        });
+        Bundle bundle = getIntent().getExtras();
+        categoryInfos = bundle.getParcelableArrayList("categorys");
+        filter(categoryInfos);
         initView();
+    }
+
+    @Override
+    protected void onResume() {
+        /**
+         * 设置为竖屏
+         */
+        if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+        super.onResume();
     }
 
     private void initView() {
@@ -86,12 +122,11 @@ public class TabActivity extends AppCompatActivity {
             List<VideoInfo> videoList = null;
             LinearLayout layout = null;
             for (int i = 0; i < container.getChildCount(); ++i) {
-                layout = (LinearLayout)container.getChildAt(i);
+                layout = (LinearLayout) container.getChildAt(i);
                 if (layout.getChildAt(0).getId() == position) {
-                    gridView = (PullToRefreshGridView)layout.getChildAt(0);
+                    gridView = (PullToRefreshGridView) layout.getChildAt(0);
                     break;
-                }
-                else{
+                } else {
                     layout = null;
                 }
             }
@@ -107,29 +142,67 @@ public class TabActivity extends AppCompatActivity {
                 gridView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<GridView>() {
                     @Override
                     public void onPullDownToRefresh(PullToRefreshBase<GridView> refreshView) {
-                        ((VideoListAdapter)(refreshView.getRefreshableView().getAdapter())).clear();
-                        if(position != 0){
+                        ((VideoListAdapter) (refreshView.getRefreshableView().getAdapter())).clear();
+                        if (position != 0) {
                             getVideoListByCateId(mList.get(position).getId(), (PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
-                        }
-                        else{
+                        } else {
                             getVideoListBySiteId((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
                         }
                     }
+
                     @Override
                     public void onPullUpToRefresh(PullToRefreshBase<GridView> refreshView) {
-                        if(position != 0){
+                        if (position != 0) {
                             getVideoListByCateId(mList.get(position).getId(), (PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
-                        }
-                        else{
+                        } else {
                             getVideoListBySiteId((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
                         }
                     }
                 });
-                gridView.setOnItemClickListener((parent, v, positions, id) ->{
-                    VideoInfo videoInfo = (VideoInfo)parent.getAdapter().getItem(positions);
-                    Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
-                    playIntent.putExtra("id", videoInfo.getId());
-                    startActivity(playIntent);
+                gridView.setOnItemClickListener((parent, v, positions, id) -> {
+                    VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
+                    String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
+                            "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                            "contentId=" + videoInfo.getId();
+
+                    new Thread(() -> {
+                        OkHttpClient client = new OkHttpClient();
+                        final Request request = new Request.Builder()
+                                .url(url)
+                                .get()
+                                .build();
+
+                        //异步加载
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.d("load", "onFailure: ");
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                response = client.newCall(request).execute();
+                                String json = response.body().string();
+                                Gson gson = new Gson();
+                                List<ContentInfo> infos = gson.fromJson(json,new TypeToken<List<ContentInfo>>() {}.getType());
+                                contentInfo=infos.get(0);
+                                if(contentInfo.getVideo360()==1){
+                                    Intent playIntent = new Intent(TabActivity.this, SimpleVrVideoActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("id", contentInfo.getId());
+                                    playIntent.putExtras(bundle);
+                                    startActivity(playIntent);
+                                }else{
+                                    Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("url", videoInfo.getPlayurl());
+                                    bundle.putString("id", videoInfo.getId());
+                                    playIntent.putExtras(bundle);
+                                    startActivity(playIntent);
+                                }
+                            }
+                        });
+                    }).start();
                 });
                 videoList = new ArrayList<>();
                 videoListAdapter = new VideoListAdapter(TabActivity.this, R.layout.video_item, videoList);
@@ -138,7 +211,7 @@ public class TabActivity extends AppCompatActivity {
                 layout.addView(gridView);
                 container.addView(layout);
             }
-            ((VideoListAdapter)gridView.getRefreshableView().getAdapter()).clear();
+            ((VideoListAdapter) gridView.getRefreshableView().getAdapter()).clear();
             if (position != 0) {
                 getVideoListByCateId(mList.get(position).getId(), gridView, (VideoListAdapter) gridView.getRefreshableView().getAdapter());
             } else {
@@ -160,10 +233,11 @@ public class TabActivity extends AppCompatActivity {
             view.getRefreshableView().setNumColumns(2);
             view.setMode(PullToRefreshBase.Mode.BOTH);
         }
+
         //根据栏目ID获取视频列表
         public void getVideoListByCateId(String cateId, PullToRefreshGridView gridView, VideoListAdapter adapter) {
             new Thread(() -> {
-                String url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&cateId=" + cateId;
+                String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&cateId=" + cateId;
                 OkHttpClient client = new OkHttpClient();
                 final Request request = new Request.Builder()
                         .url(url)
@@ -186,10 +260,11 @@ public class TabActivity extends AppCompatActivity {
                 });
             }).start();
         }
+
         //根据站点id获取视频列表
         public void getVideoListBySiteId(PullToRefreshGridView gridView, VideoListAdapter adapter) {
             new Thread(() -> {
-                String url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&siteId=" + getResources().getString(R.string.siteId);
+                String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&siteId=" + netService.getSiteId();
                 OkHttpClient client = new OkHttpClient();
                 final Request request = new Request.Builder()
                         .url(url)
@@ -212,12 +287,14 @@ public class TabActivity extends AppCompatActivity {
                 });
             }).start();
         }
+
         //将视频列表由json格式转换成类数组
         public void convertVideoFromJson(String json, PullToRefreshGridView gridView, VideoListAdapter adapter) {
             Gson gson = new Gson();
-            List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {}.getType());
+            List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {
+            }.getType());
             TabActivity.this.runOnUiThread(() -> {
-                for(int i = 0; i < videoInfoList.size(); ++i){
+                for (int i = 0; i < videoInfoList.size(); ++i) {
                     adapter.add(videoInfoList.get(i));
                 }
                 gridView.onRefreshComplete();
@@ -241,49 +318,6 @@ public class TabActivity extends AppCompatActivity {
         }
     }
 
-    private void getNeteData() {
-        new Thread(() -> {
-            String url = "http://115.28.215.145:8080/powercms/api/ContentApi-getCategoryInfo.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json";
-            OkHttpClient client = new OkHttpClient();
-            final Request request = new Request.Builder()
-                    .url(url)
-                    .get()
-                    .build();
-
-            //同步加载
-         /* try {
-              Response response = client.newCall(request).execute();
-              String json =  response.body().string();
-              initModel(json);
-          } catch (IOException e) {
-              e.printStackTrace();
-          }*/
-
-            //异步加载
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Log.d("load", "onFailure: ");
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    Log.d("load", "onResponse: " + response.body().string());
-                    response = client.newCall(request).execute();
-                    String json = response.body().string();
-                    initModel(json);
-                }
-            });
-        }).start();
-    }
-
-    public void initModel(String json) {
-        Gson gson = new Gson();
-        categoryInfos = gson.fromJson(json, new TypeToken<List<CategoryInfo>>() {
-        }.getType());
-        filter(categoryInfos);
-    }
-
     public void filter(List<CategoryInfo> list) {
         int i = 0;
         int j = 0;
@@ -293,7 +327,7 @@ public class TabActivity extends AppCompatActivity {
         mAdapter.getPageTitle(j);
         while (i < list.size()) {
             CategoryInfo categoryInfo = list.get(i);
-            if (categoryInfo.getSiteId().equals(getResources().getString(R.string.siteId))) {
+            if (categoryInfo.getSiteId().equals(netService.getSiteId())) {
                 mList.add(categoryInfo);
                 mAdapter.getCount();
                 mAdapter.getPageTitle(j + 1);
@@ -302,6 +336,6 @@ public class TabActivity extends AppCompatActivity {
             i++;
         }
         TabActivity.this.runOnUiThread(() -> mAdapter.notifyDataSetChanged());
-
     }
+
 }

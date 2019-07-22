@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Environment;
 import android.os.PowerManager;
@@ -20,8 +21,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.cec.videoplayer.R;
@@ -49,7 +53,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import master.flame.danmaku.controller.DrawHandler;
+import master.flame.danmaku.danmaku.model.BaseDanmaku;
+import master.flame.danmaku.danmaku.model.DanmakuTimer;
+import master.flame.danmaku.danmaku.model.IDanmakus;
+import master.flame.danmaku.danmaku.model.android.DanmakuContext;
+import master.flame.danmaku.danmaku.model.android.Danmakus;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
+import master.flame.danmaku.ui.widget.DanmakuView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -63,7 +76,7 @@ import okhttp3.Response;
  * Date: 2019/7/3
  * Time: 9:47 AM
  */
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements View.OnClickListener {
 
     private PlayerView player;
     private Context mContext;
@@ -75,6 +88,7 @@ public class PlayerActivity extends AppCompatActivity {
     private TextView tv_hits;
     private TextView tv_updateTime;
     private View view_file;
+    private RelativeLayout rl_player;
 
     private RecyclerView rv_content_files;
     private FilesAdapter mAdapter;
@@ -88,9 +102,25 @@ public class PlayerActivity extends AppCompatActivity {
     private String id;
     private String url;
 
+    //弹幕
+    private boolean showDanmaku;
+    private DanmakuView danmakuView;
+    private DanmakuContext danmakuContext;
+    private ImageView iv_bar_player;
+    private ImageView iv_bar_danmu;
+    private ImageView iv_back;
+    private boolean isDanmu = true;
+
+    private BaseDanmakuParser parser = new BaseDanmakuParser() {
+        @Override
+        protected IDanmakus parse() {
+            return new Danmakus();
+        }
+    };
+
+
     // 要申请的权限
     private String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE};
-
 
 
     @Override
@@ -103,8 +133,8 @@ public class PlayerActivity extends AppCompatActivity {
         initEvent();
         authority();
         getNetData(id);
-    }
 
+    }
 
 
     @SuppressLint("InvalidWakeLockTag")
@@ -115,7 +145,6 @@ public class PlayerActivity extends AppCompatActivity {
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "liveTAG");
         wakeLock.acquire();
-        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
         String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
         String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
@@ -124,11 +153,10 @@ public class PlayerActivity extends AppCompatActivity {
                 .setScaleType(PlayStateParams.fitparent)
                 .hideCenterPlayer(true)
                 .hideMenu(true)
-                .hideSteam(true)
-                .setPlaySource(url)
-                .startPlay();
+                .hideSteam(true);
 
         //初始化相关视频lv
+        rl_player = findViewById(R.id.rl_player);
         lv_relate = findViewById(R.id.lv_relate);
         relateList = new ArrayList<>();
         relAdapter = new RelateAdapter(relateList, this, lv_relate);
@@ -157,19 +185,26 @@ public class PlayerActivity extends AppCompatActivity {
         view_file = findViewById(R.id.line_file);
         view_file.setVisibility(View.GONE);
 
+
+        danmakuView = (DanmakuView) findViewById(R.id.danmaku_view);
+        danmakuView.enableDanmakuDrawingCache(true);
+        danmakuContext = DanmakuContext.create();
+        danmakuView.prepare(parser, danmakuContext);
+
+        iv_bar_player = findViewById(R.id.app_video_play);
+        iv_bar_danmu = findViewById(R.id.app_video_danmu);
+        iv_back = (ImageView)findViewById(com.dou361.ijkplayer.R.id.app_video_finish);
     }
 
     private void initEvent() {
+        iv_bar_player.setOnClickListener(this);
+        iv_bar_danmu.setOnClickListener(this);
+        player.iv_fullscreen.setOnClickListener(this);
+        iv_back.setOnClickListener(this);
 
         //切换相关视频
         relAdapter.setOnListClickListener((relate, position) -> {
-//            Intent intent = new Intent(PlayerActivity.this, PlayerActivity.class);
-//            intent.putExtra("title", relateList.get(position).getTitle());
-//            intent.putExtra("id", relateList.get(position).getId());
-//            startActivity(intent);
-
             getNetData(relateList.get(position).getId());
-
         });
 
         comAdapter.setOnListClickListener((comment, position) -> {
@@ -178,19 +213,44 @@ public class PlayerActivity extends AppCompatActivity {
 
         //切换剧集
         mAdapter.setOnListClickListener((v, position) -> {
-             contentInfo.getFiles().get(position).getPlayurl();
+             player.setPlaySource(contentInfo.getFiles().get(position).getPlayurl())
+                    .startPlay();
 
-            String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
+           /* String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
             String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
 
             player.setPlaySource((position == 0) ? h264 : h265 )
-                    .startPlay();
+                    .startPlay();*/
+        });
+
+
+        danmakuView.setCallback(new DrawHandler.Callback() {
+            @Override
+            public void prepared() {
+                showDanmaku = true;
+                danmakuView.start();
+                generateSomeDanmaku();
+            }
+
+            @Override
+            public void updateTimer(DanmakuTimer timer) {
+
+            }
+
+            @Override
+            public void danmakuShown(BaseDanmaku danmaku) {
+
+            }
+
+            @Override
+            public void drawingFinished() {
+
+            }
         });
 
     }
 
     private void getNetData(String id) {
-
         url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
                 "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
                 "contentId="+ id;
@@ -225,50 +285,172 @@ public class PlayerActivity extends AppCompatActivity {
 
         contentInfo = infos.get(0);
         relateList = infos.get(1).getRelates();
-
-        //子线程刷新UI
-        PlayerActivity.this.runOnUiThread(() -> {
-            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
-            player.setPlaySource(url)
-                    .showThumbnail(ivThumbnail -> Glide.with(mContext)
-                    .load(contentInfo.getImage())
-                    .placeholder(R.color.cl_default)
-                    .error(R.color.cl_error)
-                    .into(ivThumbnail))
-                    .startPlay();
+        if (contentInfo.getFiles().size() > 0) {
+            //子线程刷新UI
+            PlayerActivity.this.runOnUiThread(() -> {
+                String url = contentInfo.getFiles().get(0).getPlayurl();
+//            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+//            String url = "http://115.28.215.145:3880/D:/mediaupload/602f134a2548423786b861830607ca46.mp41.mp4";
+                player.setPlaySource(url)
+                        .showThumbnail(ivThumbnail -> Glide.with(mContext)
+                                .load(contentInfo.getImage())
+                                .placeholder(R.color.cl_default)
+                                .error(R.color.cl_error)
+                                .into(ivThumbnail))
+                        .startPlay();
 //            String playUrl = contentInfo.getFiles().get(0).getPlayurl();
 //            player.setPlaySource(playUrl);
 
-            relAdapter.onDateChange(relateList);
+                relAdapter.onDateChange(relateList);
 
-            tv_title.setText(contentInfo.getTitle());
-            tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
-            tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
+                tv_title.setText(contentInfo.getTitle());
+                tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
+                tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
 
-            if (contentInfo.getFiles().size() > 1) {
-                rv_content_files.setVisibility(View.VISIBLE);
-                view_file.setVisibility(View.VISIBLE);
-                mAdapter.onDateChange(contentInfo.getFiles());
-            } else {
-                rv_content_files.setVisibility(View.GONE);
-                view_file.setVisibility(View.GONE);
-            }
-
-        });
+                if (contentInfo.getFiles().size() > 1) {
+                    rv_content_files.setVisibility(View.VISIBLE);
+                    view_file.setVisibility(View.VISIBLE);
+                    mAdapter.onDateChange(contentInfo.getFiles());
+                } else {
+                    rv_content_files.setVisibility(View.GONE);
+                    view_file.setVisibility(View.GONE);
+                }
+            });
+        } else {
+            ToastUtils.showLong("无播放文件!");
+        }
 
     }
 
 
     /**
+     * 绑定点击事件
+     * @param v
+     */
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.app_video_play :
+                /**视频播放和暂停*/
+                if (player.videoView.isPlaying()) {
+                    danmakuView.pause();
+                    if (player.isLive) {
+                        player.videoView.stopPlayback();
+                    } else {
+                        player.pausePlay();
+                    }
+
+                } else {
+                    player.startPlay();
+                    if (player.videoView.isPlaying()) {
+                        player.status = PlayStateParams.STATE_PREPARING;
+                        player.hideStatusUI();
+                    }
+                    danmakuView.resume();
+                }
+                player.updatePausePlay();
+                break;
+            case R.id.app_video_danmu :
+                /**隐藏或显示弹幕*/
+                if (isDanmu) {
+                    danmakuView.setVisibility(View.GONE);
+                    iv_bar_danmu.setImageResource(R.drawable.danmuguan);
+                    isDanmu = false;
+                } else {
+                    danmakuView.setVisibility(View.VISIBLE);
+                    iv_bar_danmu.setImageResource(R.drawable.danmukai);
+                    isDanmu = true;
+                }
+                break;
+            case R.id.app_video_fullscreen :
+                /**视频全屏切换*/
+                toggleFullScreen();
+                break;
+            case R.id.app_video_finish :
+                /**返回*/
+                if ( !player.isPortrait) {
+                    toggleFullScreen();
+                } else {
+                    this.finish();
+                }
+
+        }
+    }
+
+    /**
      * 播放本地视频
      */
-
     private String getLocalVideoPath(String name) {
         String sdCard = Environment.getExternalStorageDirectory().getPath();
         String uri = sdCard + File.separator + name;
         return uri;
     }
 
+    /**
+     * 全屏切换
+     */
+    public PlayerView toggleFullScreen() {
+
+        if (player.getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
+            params.weight = 3;
+            rl_player.setLayoutParams(params);
+            player.mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            rl_player.setLayoutParams(params);
+            player.mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        player.isPortrait = (player.getScreenOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        player.updateFullScreenButton();
+        return player;
+    }
+
+    /**
+     * 向弹幕View中添加一条弹幕
+     * @param content
+     *          弹幕的具体内容
+     * @param  withBorder
+     *          弹幕是否有边框
+     */
+    private void addDanmaku(String content, boolean withBorder) {
+        BaseDanmaku danmaku = danmakuContext.mDanmakuFactory.createDanmaku(BaseDanmaku.TYPE_SCROLL_RL);
+        danmaku.text = content;
+        danmaku.padding = 5;
+        danmaku.textSize = sp2px(20);
+        danmaku.textColor = Color.WHITE;
+        danmaku.setTime(danmakuView.getCurrentTime());
+        if (withBorder) {
+            danmaku.borderColor = Color.GREEN;
+        }
+        danmakuView.addDanmaku(danmaku);
+    }
+
+    /**
+     * 随机生成一些弹幕内容以供测试
+     */
+    private void generateSomeDanmaku() {
+        new Thread(() -> {
+            while(showDanmaku) {
+                int time = new Random().nextInt(300);
+                String content = "" + time + time;
+                addDanmaku(content, false);
+                try {
+                    Thread.sleep(time);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * sp转px的方法。
+     */
+    public int sp2px(float spValue) {
+        final float fontScale = getResources().getDisplayMetrics().scaledDensity;
+        return (int) (spValue * fontScale + 0.5f);
+    }
 
 
 
@@ -280,6 +462,10 @@ public class PlayerActivity extends AppCompatActivity {
             player.onPause();
         }
         MediaUtils.muteAudioFocus(mContext, true);
+
+        if (danmakuView != null && danmakuView.isPrepared()) {
+            danmakuView.pause();
+        }
     }
 
     @Override
@@ -292,6 +478,9 @@ public class PlayerActivity extends AppCompatActivity {
         if (wakeLock != null) {
             wakeLock.acquire();
         }
+        if (danmakuView != null && danmakuView.isPrepared() && danmakuView.isPaused()) {
+            danmakuView.resume();
+        }
     }
 
     @Override
@@ -300,13 +489,24 @@ public class PlayerActivity extends AppCompatActivity {
         if (player != null) {
             player.onDestroy();
         }
+        showDanmaku = false;
+        if (danmakuView != null) {
+            danmakuView.release();
+            danmakuView = null;
+        }
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        if (player != null) {
-            player.onConfigurationChanged(newConfig);
+//        if (player != null) {
+//            player.onConfigurationChanged(newConfig);
+//        }
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            ToastUtils.showShort("landscape");
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+//            ToastUtils.showShort("portrait");
         }
     }
 

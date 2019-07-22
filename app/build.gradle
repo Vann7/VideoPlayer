@@ -34,19 +34,20 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:26.0.0'
-    implementation 'com.android.support:design:26.0.0-alpha1'
+    implementation 'com.android.support:design:26.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.android.support:recyclerview-v7:26.0.0'
-    implementation 'com.android.support:cardview-v7:26.0.0-alpha1'
+    implementation 'com.android.support:cardview-v7:26.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    implementation 'org.litepal.android:java:3.0.0'
+    implementation 'org.apache.shiro:shiro-core:1.2.4'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
     implementation 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
     implementation project(path: ':jjdxm-ijkplayer')
     implementation 'com.github.bumptech.glide:glide:3.7.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-
     implementation 'com.github.devlight.shadowlayout:library:1.0.2'
     //    根据需要支持去拓展，在jjdxm-ijkplayer中默认加入了armv7a的了
     implementation 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
@@ -65,4 +66,14 @@ dependencies {
 //    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
 
     implementation 'com.squareup.picasso:picasso:2.4.0'
+    implementation project(':library')
+
+    //google vr
+    implementation 'com.google.vr:sdk-videowidget:1.170.0'
+
+    //弹幕
+    implementation 'com.github.ctiao:DanmakuFlameMaster:0.9.25'
+    implementation 'com.github.ctiao:ndkbitmap-armv7a:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-armv5:0.9.21'
+    implementation 'com.github.ctiao:ndkbitmap-x86:0.9.21'
 }

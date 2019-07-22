@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.activity.TabActivity;
 import com.cec.videoplayer.module.VideoInfo;
+import com.cec.videoplayer.service.NetService;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class VideoListAdapter extends ArrayAdapter<VideoInfo> {
     private Context mContext;
     private int mResourceId;
+    private NetService netService=new NetService();
     public VideoListAdapter(Context context, int resourceId, List<VideoInfo> videoList){
         super(context, resourceId, videoList);
         mContext = context;
@@ -45,7 +47,7 @@ public class VideoListAdapter extends ArrayAdapter<VideoInfo> {
             videoHolder = (VideoHolder) view.getTag();
         }
         videoHolder.videoTitle.setText(video.getTitle());
-        Picasso.with(getContext()).load("http://115.28.215.145:8080/powercms/" + video.getImage()).into(videoHolder.videoImage);
+        Picasso.with(getContext()).load("http://"+netService.getIp()+":"+netService.getPort()+"/powercms/" + video.getImage()).into(videoHolder.videoImage);
         return view;
     }
     class VideoHolder{

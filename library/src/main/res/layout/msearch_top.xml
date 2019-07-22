@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@drawable/background_gradient">
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:layout_gravity="center"
+            android:layout_weight="18">
+
+            <EditText
+                android:id="@+id/et_searchtext_search"
+                android:layout_width="525dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/search_background_shape"
+                android:drawableLeft="@drawable/explore_search_icon"
+                android:drawablePadding="10dp"
+                android:imeOptions="actionSearch"
+                android:singleLine="true"
+                android:textColor="#ffffff"
+                android:textColorHint="#ACABAB"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/ib_searchtext_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/et_searchtext_search"
+                android:layout_alignRight="@+id/et_searchtext_search"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:src="@drawable/explore_search_close"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/buttonback"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/relativeLayout"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/search"
+            android:gravity="center"
+            android:text="@string/search_cancel"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+    </LinearLayout>
+</LinearLayout>
+

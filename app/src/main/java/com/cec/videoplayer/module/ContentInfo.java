@@ -12,6 +12,7 @@ import java.util.List;
 public class ContentInfo {
     private String id;
     private String title;
+    private int video360;
     private int hits;
     private int dayHits;
     private int weekHits;
@@ -28,10 +29,13 @@ public class ContentInfo {
     public String toString() {
         return "ContentInfo{" +
                 "id='" + id + '\'' +
+                ", hits=" + hits +
                 ", title='" + title + '\'' +
                 ", dayHits=" + dayHits +
                 ", weekHits=" + weekHits +
+                ", monthHits=" + monthHits +
                 ", updateTime=" + updateTime +
+                ", video360=" + video360 +
                 ", href='" + href + '\'' +
                 ", image='" + image + '\'' +
                 ", catestr='" + catestr + '\'' +
@@ -54,6 +58,12 @@ public class ContentInfo {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public int getVideo360(){return video360;}
+
+    public void setVideo360(int video360) {
+        this.video360 = video360;
     }
 
     public int getHits() {
@@ -135,4 +145,5 @@ public class ContentInfo {
     public void setRelates(List<Relate> relates) {
         this.relates = relates;
     }
+
 }
