@@ -131,7 +131,7 @@ public class TabActivity extends AppCompatActivity {
                     playIntent.putExtra("id", videoInfo.getId());
                     startActivity(playIntent);
                 });
-                videoList = new ArrayList<VideoInfo>();
+                videoList = new ArrayList<>();
                 videoListAdapter = new VideoListAdapter(TabActivity.this, R.layout.video_item, videoList);
                 gridView.setAdapter(videoListAdapter);
 
