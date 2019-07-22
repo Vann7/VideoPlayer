@@ -213,14 +213,14 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         //切换剧集
         mAdapter.setOnListClickListener((v, position) -> {
-             player.setPlaySource(contentInfo.getFiles().get(position).getPlayurl())
-                    .startPlay();
+//             player.setPlaySource(contentInfo.getFiles().get(position).getPlayurl())
+//                    .startPlay();
 
-           /* String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
-            String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
+            String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
+            String h265 = getLocalVideoPath("video-h265.mkv");
 
             player.setPlaySource((position == 0) ? h264 : h265 )
-                    .startPlay();*/
+                    .startPlay();
         });
 
 
@@ -285,7 +285,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         contentInfo = infos.get(0);
         relateList = infos.get(1).getRelates();
-        if (contentInfo.getFiles().size() > 0) {
+        if (contentInfo.getFiles() != null && contentInfo.getFiles().size() > 0) {
             //子线程刷新UI
             PlayerActivity.this.runOnUiThread(() -> {
                 String url = contentInfo.getFiles().get(0).getPlayurl();
@@ -317,7 +317,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 }
             });
         } else {
-            ToastUtils.showLong("无播放文件!");
+            this.finish();
         }
 
     }
