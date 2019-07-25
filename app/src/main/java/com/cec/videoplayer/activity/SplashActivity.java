@@ -3,6 +3,7 @@ package com.cec.videoplayer.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +14,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.cec.videoplayer.R;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.service.NetService;
 import com.google.gson.Gson;
@@ -40,6 +42,8 @@ public class SplashActivity extends Activity {
     private List<CategoryInfo> tcategoryInfos = new ArrayList<>();
     private int net = 0;
     private NetService netService = new NetService();
+    private boolean isLogin;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,7 @@ public class SplashActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_splash);
+        getSession();
         initView();
     }
     @Override
@@ -64,48 +69,55 @@ public class SplashActivity extends Activity {
         super.onResume();
     }
     private void initView() {
-        if (!isNetworkAvailable(SplashActivity.this)) {
-            if (isWifi(SplashActivity.this)) {
-                net = 1;
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
-                        intent.putExtra("netType", net);
-                        startActivity(intent);
-                        SplashActivity.this.finish();
-                    }
-                }, SPLASH_DISPLAY_LENGHT);
-            } else if (isMobile(SplashActivity.this)) {
-                net = 2;
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
-                        intent.putExtra("netType", net);
-                        startActivity(intent);
-                        SplashActivity.this.finish();
-                    }
-                }, SPLASH_DISPLAY_LENGHT);
+        if (!isLogin) {
+            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+            startActivity(intent);
+            this.finish();
+        } else {
+            if (!isNetworkAvailable(SplashActivity.this)) {
+                if (isWifi(SplashActivity.this)) {
+                    net = 1;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
+                            intent.putExtra("netType", net);
+                            startActivity(intent);
+                            SplashActivity.this.finish();
+                        }
+                    }, SPLASH_DISPLAY_LENGHT);
+                } else if (isMobile(SplashActivity.this)) {
+                    net = 2;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
+                            intent.putExtra("netType", net);
+                            startActivity(intent);
+                            SplashActivity.this.finish();
+                        }
+                    }, SPLASH_DISPLAY_LENGHT);
+                } else {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
+                            startActivity(intent);
+                            SplashActivity.this.finish();
+                        }
+                    }, SPLASH_DISPLAY_LENGHT);
+                }
+
             } else {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
-                        startActivity(intent);
-                        SplashActivity.this.finish();
+                        getNeteData();
                     }
                 }, SPLASH_DISPLAY_LENGHT);
             }
-
-        } else {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    getNeteData();
-                }
-            }, SPLASH_DISPLAY_LENGHT);
         }
+
     }
 
     private void getNeteData() {
@@ -202,4 +214,11 @@ public class SplashActivity extends Activity {
                 Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo();
     }
+
+    private void getSession() {
+        SharedPreferences setting = this.getSharedPreferences("User", 0);
+        user = new User(setting.getString("name", ""), setting.getString("password", ""));
+        isLogin = setting.getBoolean("isLogin", false);
+    }
+
 }

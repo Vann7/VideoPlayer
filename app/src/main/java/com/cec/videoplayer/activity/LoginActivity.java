@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,14 +20,18 @@ import android.widget.ImageView;
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.db.DatabaseHelper;
 import com.cec.videoplayer.model.User;
+import com.cec.videoplayer.utils.ActivityManager;
 import com.cec.videoplayer.utils.EditTextClearUtil;
-import com.cec.videoplayer.utils.StatusBarUtils;
 import com.cec.videoplayer.utils.ToastUtils;
-import com.cec.videoplayer.service.UserService;
 
 
-import java.util.List;
-import java.util.UUID;
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * 登录活动页
@@ -39,14 +44,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText e1, e2;
     private ImageView m1, m2;
     private Button btn;
-    private UserService userService;
     // 要申请的权限
-    private String[] permissions = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
-    private String[] permission_camera = {Manifest.permission.CAMERA};
-    private String[] permission_write_storage = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-    private byte[] images;
+    private String[] permissions = { Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
     private User sessionUser;
+    private String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +60,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             decorView.setSystemUiVisibility(option);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
-        saveConfig();
+        //判断当前栈中是否已存在LoginActivity
+       boolean flag =  ActivityManager.isExistActivity(LoginActivity.class);
+       if (!flag) {
+           ActivityManager.getActivityManager().add(this);
+       }
+       //关闭除当前activity外的所有activity
+        ActivityManager.finish(this);
+
         getSession();
         authority();
         init();
@@ -85,70 +93,64 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         m2 = (ImageView) findViewById(R.id.del_password);
         EditTextClearUtil.addclerListener(e1, m1);
         EditTextClearUtil.addclerListener(e2, m2);
-        if (sessionUser != null && sessionUser.getName() == "") {
-            e1.setText("root");
-        } else {
+        if (sessionUser != null && sessionUser.getName() != "") {
             e1.setText(sessionUser.getName());
+            e2.setText(sessionUser.getPassword());
         }
 
-        e2.setText("admin"); //todo 正式上线时,取消
-//        e2.setText(sessionUser.getPassword());
-
-
-//        ImageUtil imageUtil = new ImageUtil(this);
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.default_image);
-//        images = imageUtil.imageToByte(bitmap);
     }
 
     @Override
     public void onClick(View v) {
-        userService = new UserService(this);
 
         User user = new User(e1.getText().toString(), e2.getText().toString());
-        user.setmId(UUID.randomUUID().toString());
         switch (v.getId()) {
             case R.id.loginButton:
                 if (user.getName().equals("") || user.getPassword().equals("")) {
                     ToastUtils.showShort("用户名和密码不能为空");
                     return;
                 }
-                List<User> list = userService.checkUser(user);
-                if (list.size() > 0) {
-                    saveSession(list.get(0));
-                    Intent intent = new Intent(LoginActivity.this, TabActivity.class);
-                    intent.putExtra("user", user);
-                    setResult(RESULT_OK, intent);
-                    startActivityForResult(intent, 1);
-//                    startActivity(intent,ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
-                    this.finish();
-                } else {
-                    ToastUtils.showShort("当前用户名或密码错误");
-                }
+
+
+                //接口提供后使用
+//                login();
+                user = new User("demo1", "123456","f620969ebe7a0634c0aabc1b4fecf1ab" );
+                saveSession(user);
+                Intent intent = new Intent(LoginActivity.this, TabActivity.class);
+                startActivity(intent);
+                this.finish();
                 break;
         }
 
     }
 
+    //通过网络获取用户登录信息
+    private void login() {
+        //登录请求接口
+        url = "";
+        new Thread(() -> {
+            OkHttpClient client = new OkHttpClient();
+            final Request request = new Request.Builder()
+                    .url(url)
+                    .get()
+                    .build();
+            //异步加载
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.d("load", "onFailure: ");
+                }
 
-    /**
-     * 第一次登录系统 保存root用户信息
-     */
-    private void saveConfig() {
-        setting = getSharedPreferences("setting", MODE_PRIVATE);
-        SharedPreferences.Editor editor = setting.edit();
-        is_first = setting.getBoolean("FIRST", true);
-        if (is_first) {
-            editor.putString("name", "root");
-            editor.putString("password", "admin");
-            editor.putBoolean("FIRST", false);
-            editor.putBoolean("appUpdate", false);
-            boolean flag = editor.commit();
-            if (flag) {
-                userService = new UserService(this);
-                userService.insert(new User("root", "admin", false));
-            }
-        }
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    response = client.newCall(request).execute();
+                    String json =  response.body().string(); //请求返回结果
+                }
+            });
+        }).start();
     }
+
+
 
     /**
      * 保存当前用户session用于"我的"界面显示用户信息
@@ -158,11 +160,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void saveSession(User user) {
         SharedPreferences setting = getSharedPreferences("User", 0);
         SharedPreferences.Editor editor = setting.edit();
-        editor.putString("id", String.valueOf(user.getId()));
+        //判断当前用户是否已登录
+        editor.putBoolean("isLogin", true);
+        //用户登录接口提供后使用
+        editor.putString("token", String.valueOf(user.getToken()));
         editor.putString("name", user.getName());
-        editor.putString("mid", user.getmId());
         editor.putString("password", user.getPassword());
-        editor.putBoolean("appUpdate", user.isAppUpdate());
         editor.commit();
     }
 
@@ -179,13 +182,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             ActivityCompat.requestPermissions(this,
                     permissions, 321);
             if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-//                ContextCompat.checkSelfPermission(this,
-//                    Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED ||
-                    ContextCompat.checkSelfPermission(this,
                             Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
             ) {
-                // 开始提交摄像头、存储请求权限
+                // 开始提交存储请求权限
                 ActivityCompat.requestPermissions(this, permissions, 321);
             }
         }
@@ -197,8 +196,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private void getSession() {
         SharedPreferences setting = this.getSharedPreferences("User", 0);
         sessionUser = new User(setting.getString("name", ""), setting.getString("password", ""));
-        sessionUser.setId(Integer.valueOf(setting.getString("id", "0")));
-        sessionUser.setAppUpdate(Boolean.valueOf(setting.getBoolean("appUpdate", false)));
     }
+
+
 
 }
