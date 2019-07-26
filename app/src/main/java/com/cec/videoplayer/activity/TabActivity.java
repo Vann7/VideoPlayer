@@ -1,10 +1,14 @@
 package com.cec.videoplayer.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.PagerAdapter;
@@ -27,6 +31,7 @@ import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.VideoInfo;
 import com.cec.videoplayer.service.NetService;
+import com.cec.videoplayer.utils.FileUtil;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
@@ -57,6 +62,7 @@ public class TabActivity extends AppCompatActivity {
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
     private NetService netService = new NetService();
     private ContentInfo contentInfo;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -160,49 +166,69 @@ public class TabActivity extends AppCompatActivity {
                     }
                 });
                 gridView.setOnItemClickListener((parent, v, positions, id) -> {
-                    VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
-                    String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
-                            "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
-                            "contentId=" + videoInfo.getId();
+//                    if (!isNetworkAvailable(TabActivity.this)) {
+//                        if (isWifi(TabActivity.this)) {
+//                            net = 1;
+//                            Intent intent = new Intent(TabActivity.this, NoNetworkActivity.class);
+//                            intent.putExtra("netType", net);
+//                            startActivity(intent);
+//                        } else if (isMobile(TabActivity.this)) {
+//                            net = 2;
+//                            Intent intent = new Intent(TabActivity.this, NoNetworkActivity.class);
+//                            intent.putExtra("netType", net);
+//                            startActivity(intent);
+//                        } else {
+//                            Intent intent = new Intent(TabActivity.this, NoNetworkActivity.class);
+//                            startActivity(intent);
+//                        }
+//                    }
+//                    else {
+                        VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
+                        String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
+                                "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                                "contentId=" + videoInfo.getId();
 
-                    new Thread(() -> {
-                        OkHttpClient client = new OkHttpClient();
-                        final Request request = new Request.Builder()
-                                .url(url)
-                                .get()
-                                .build();
+                        new Thread(() -> {
+                            OkHttpClient client = new OkHttpClient();
+                            final Request request = new Request.Builder()
+                                    .url(url)
+                                    .get()
+                                    .build();
 
-                        //异步加载
-                        client.newCall(request).enqueue(new Callback() {
-                            @Override
-                            public void onFailure(Call call, IOException e) {
-                                Log.d("load", "onFailure: ");
-                            }
-
-                            @Override
-                            public void onResponse(Call call, Response response) throws IOException {
-                                response = client.newCall(request).execute();
-                                String json = response.body().string();
-                                Gson gson = new Gson();
-                                List<ContentInfo> infos = gson.fromJson(json,new TypeToken<List<ContentInfo>>() {}.getType());
-                                contentInfo=infos.get(0);
-                                if(contentInfo.getVideo360()==1){
-                                    Intent playIntent = new Intent(TabActivity.this, SimpleVrVideoActivity.class);
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("id", contentInfo.getId());
-                                    playIntent.putExtras(bundle);
-                                    startActivity(playIntent);
-                                }else{
-                                    Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("url", videoInfo.getPlayurl());
-                                    bundle.putString("id", videoInfo.getId());
-                                    playIntent.putExtras(bundle);
-                                    startActivity(playIntent);
+                            //异步加载
+                            client.newCall(request).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    Log.d("load", "onFailure: ");
                                 }
-                            }
-                        });
-                    }).start();
+
+                                @Override
+                                public void onResponse(Call call, Response response) throws IOException {
+                                    response = client.newCall(request).execute();
+                                    String json = response.body().string();
+                                    Gson gson = new Gson();
+                                    List<ContentInfo> infos = gson.fromJson(json, new TypeToken<List<ContentInfo>>() {
+                                    }.getType());
+                                    contentInfo = infos.get(0);
+                                    if (contentInfo.getVideo360() == 1) {
+                                        Intent playIntent = new Intent(TabActivity.this, SimpleVrVideoActivity.class);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("id", contentInfo.getId());
+                                        playIntent.putExtras(bundle);
+                                        startActivity(playIntent);
+                                    } else {
+                                        Intent playIntent = new Intent(TabActivity.this, PlayerActivity.class);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("url", videoInfo.getPlayurl());
+                                        bundle.putString("id", videoInfo.getId());
+                                        playIntent.putExtras(bundle);
+                                        startActivity(playIntent);
+                                    }
+                                }
+
+                            });
+                        }).start();
+//                    }
                 });
                 videoList = new ArrayList<VideoInfo>();
                 videoListAdapter = new VideoListAdapter(TabActivity.this, R.layout.video_item, videoList);
@@ -211,7 +237,11 @@ public class TabActivity extends AppCompatActivity {
                 layout.addView(gridView);
                 container.addView(layout);
             }
-            ((VideoListAdapter) gridView.getRefreshableView().getAdapter()).clear();
+            ((VideoListAdapter) gridView.getRefreshableView().
+
+                    getAdapter()).
+
+                    clear();
             if (position != 0) {
                 getVideoListByCateId(mList.get(position).getId(), gridView, (VideoListAdapter) gridView.getRefreshableView().getAdapter());
             } else {
@@ -235,7 +265,8 @@ public class TabActivity extends AppCompatActivity {
         }
 
         //根据栏目ID获取视频列表
-        public void getVideoListByCateId(String cateId, PullToRefreshGridView gridView, VideoListAdapter adapter) {
+        public void getVideoListByCateId(String cateId, PullToRefreshGridView
+                gridView, VideoListAdapter adapter) {
             new Thread(() -> {
                 String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&cateId=" + cateId;
                 OkHttpClient client = new OkHttpClient();
@@ -262,7 +293,8 @@ public class TabActivity extends AppCompatActivity {
         }
 
         //根据站点id获取视频列表
-        public void getVideoListBySiteId(PullToRefreshGridView gridView, VideoListAdapter adapter) {
+        public void getVideoListBySiteId(PullToRefreshGridView gridView, VideoListAdapter
+                adapter) {
             new Thread(() -> {
                 String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&siteId=" + netService.getSiteId();
                 OkHttpClient client = new OkHttpClient();
@@ -289,7 +321,8 @@ public class TabActivity extends AppCompatActivity {
         }
 
         //将视频列表由json格式转换成类数组
-        public void convertVideoFromJson(String json, PullToRefreshGridView gridView, VideoListAdapter adapter) {
+        public void convertVideoFromJson(String json, PullToRefreshGridView
+                gridView, VideoListAdapter adapter) {
             Gson gson = new Gson();
             List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {
             }.getType());
@@ -316,6 +349,54 @@ public class TabActivity extends AppCompatActivity {
             CategoryInfo categoryInfo = mList.get(position);
             return categoryInfo.getName();
         }
+
+        /**
+         * 检查是否有网络
+         */
+        public boolean isNetworkAvailable(Context context) {
+
+            NetworkInfo info = getNetworkInfo(context);
+            return info != null && info.isAvailable();
+        }
+
+
+        /**
+         * 检查是否是WIFI
+         */
+        public boolean isWifi(Context context) {
+
+            NetworkInfo info = getNetworkInfo(context);
+            if (info != null) {
+                if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        /**
+         * 检查是否是移动网络
+         */
+        public boolean isMobile(Context context) {
+
+            NetworkInfo info = getNetworkInfo(context);
+            if (info != null) {
+                if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        private NetworkInfo getNetworkInfo(Context context) {
+
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            return cm.getActiveNetworkInfo();
+        }
+
     }
 
     public void filter(List<CategoryInfo> list) {

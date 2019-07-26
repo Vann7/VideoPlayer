@@ -1,9 +1,12 @@
 package com.cec.videoplayer.activity;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -17,11 +20,13 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.cec.videoplayer.R;
 
 import com.cec.videoplayer.adapter.VideoListAdapter;
 import com.cec.videoplayer.module.CategoryInfo;
+import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.VideoInfo;
 import com.cec.videoplayer.service.NetService;
 import com.google.gson.Gson;
@@ -52,8 +57,12 @@ public class SearchActivity extends AppCompatActivity {
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
     private NetService netService = new NetService();
     private String keyWord;
-    private LinearLayout linearLayout;
+    private LinearLayout noResultLayout;
+    private LinearLayout netErrorLayout;
+    private LinearLayout historyLayout;
     private ViewPager viewPager;
+    private ContentInfo contentInfo;
+    private int net = 0;
 
 
     @Override
@@ -62,7 +71,9 @@ public class SearchActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.search_main);
         searchLayout = findViewById(R.id.searchlayout);
-        linearLayout = findViewById(R.id.no_search_result);
+        noResultLayout = findViewById(R.id.no_search_result);
+        netErrorLayout = findViewById(R.id.net_error_layout);
+        historyLayout = (LinearLayout) findViewById(R.id.history_list);
         viewPager = findViewById(R.id.search_tab_viewpager);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             View decorView = getWindow().getDecorView();
@@ -114,11 +125,22 @@ public class SearchActivity extends AppCompatActivity {
         searchLayout.initData(skills, new onSearchCallBackListener() { //匿名内部类，不是new一个接口
             @Override
             public void Search(String str) {
-                //进行或联网搜索
-                keyWord = str;
-                tabLayout.setTabMode(TabLayout.MODE_FIXED);
-                vp_pager.setAdapter(mAdapter);
-                tabLayout.setupWithViewPager(vp_pager);
+                noResultLayout.setVisibility(View.GONE);
+                viewPager.setVisibility(View.VISIBLE);
+                historyLayout.setVisibility(View.GONE);
+                MorePagerAdapter morePagerAdapter = new MorePagerAdapter();
+                if (!morePagerAdapter.isNetworkAvailable(SearchActivity.this)) {
+                    netErrorLayout.setVisibility(View.VISIBLE);
+                    viewPager.setVisibility(View.GONE);
+                    TextView textView = findViewById(R.id.net_error_text);
+                    textView.setText("无网络连接" + "\n" + "请检查网络设置！");
+                } else {
+                    //进行或联网搜索
+                    keyWord = str;
+                    tabLayout.setTabMode(TabLayout.MODE_FIXED);
+                    vp_pager.setAdapter(mAdapter);
+                    tabLayout.setupWithViewPager(vp_pager);
+                }
             }
 
             @Override
@@ -200,13 +222,67 @@ public class SearchActivity extends AppCompatActivity {
                     }
                 });
                 gridView.setOnItemClickListener((parent, v, positions, id) -> {
-                    VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
-                    Intent playIntent = new Intent(SearchActivity.this, PlayerActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("url", videoInfo.getPlayurl());
-                    bundle.putString("id", videoInfo.getId());
-                    playIntent.putExtras(bundle);
-                    startActivity(playIntent);
+                    if (!isNetworkAvailable(SearchActivity.this)) {
+                        if (isWifi(SearchActivity.this)) {
+                            net = 1;
+                            Intent intent = new Intent(SearchActivity.this, NoNetworkActivity.class);
+                            intent.putExtra("netType", net);
+                            startActivity(intent);
+                        } else if (isMobile(SearchActivity.this)) {
+                            net = 2;
+                            Intent intent = new Intent(SearchActivity.this, NoNetworkActivity.class);
+                            intent.putExtra("netType", net);
+                            startActivity(intent);
+                        } else {
+                            Intent intent = new Intent(SearchActivity.this, NoNetworkActivity.class);
+                            startActivity(intent);
+                        }
+                    } else {
+                        VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
+                        String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
+                                "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                                "contentId=" + videoInfo.getId();
+
+                        new Thread(() -> {
+                            OkHttpClient client = new OkHttpClient();
+                            final Request request = new Request.Builder()
+                                    .url(url)
+                                    .get()
+                                    .build();
+
+                            //异步加载
+                            client.newCall(request).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    Log.d("load", "onFailure: ");
+                                }
+
+                                @Override
+                                public void onResponse(Call call, Response response) throws IOException {
+                                    response = client.newCall(request).execute();
+                                    String json = response.body().string();
+                                    Gson gson = new Gson();
+                                    List<ContentInfo> infos = gson.fromJson(json, new TypeToken<List<ContentInfo>>() {
+                                    }.getType());
+                                    contentInfo = infos.get(0);
+                                    if (contentInfo.getVideo360() == 1) {
+                                        Intent playIntent = new Intent(SearchActivity.this, SimpleVrVideoActivity.class);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("id", contentInfo.getId());
+                                        playIntent.putExtras(bundle);
+                                        startActivity(playIntent);
+                                    } else {
+                                        Intent playIntent = new Intent(SearchActivity.this, PlayerActivity.class);
+                                        Bundle bundle = new Bundle();
+                                        bundle.putString("url", videoInfo.getPlayurl());
+                                        bundle.putString("id", videoInfo.getId());
+                                        playIntent.putExtras(bundle);
+                                        startActivity(playIntent);
+                                    }
+                                }
+                            });
+                        }).start();
+                    }
                 });
                 videoList = new ArrayList<VideoInfo>();
                 videoListAdapter = new VideoListAdapter(SearchActivity.this, R.layout.video_item, videoList);
@@ -274,9 +350,9 @@ public class SearchActivity extends AppCompatActivity {
                     for (int i = 0; i < videoInfoList.size(); ++i) {
                         adapter.add(videoInfoList.get(i));
                     }
-                }else{
+                } else {
                     viewPager.setVisibility(View.GONE);
-                    linearLayout.setVisibility(View.VISIBLE);
+                    noResultLayout.setVisibility(View.VISIBLE);
                 }
                 gridView.onRefreshComplete();
             });
@@ -296,6 +372,53 @@ public class SearchActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             CategoryInfo categoryInfo = mList.get(position);
             return categoryInfo.getName();
+        }
+
+        /**
+         * 检查是否有网络
+         */
+        public boolean isNetworkAvailable(Context context) {
+
+            NetworkInfo info = getNetworkInfo(context);
+            return info != null && info.isAvailable();
+        }
+
+
+        /**
+         * 检查是否是WIFI
+         */
+        public boolean isWifi(Context context) {
+
+            NetworkInfo info = getNetworkInfo(context);
+            if (info != null) {
+                if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        /**
+         * 检查是否是移动网络
+         */
+        public boolean isMobile(Context context) {
+
+            NetworkInfo info = getNetworkInfo(context);
+            if (info != null) {
+                if (info.getType() == ConnectivityManager.TYPE_MOBILE) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        private NetworkInfo getNetworkInfo(Context context) {
+
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            return cm.getActiveNetworkInfo();
         }
     }
 

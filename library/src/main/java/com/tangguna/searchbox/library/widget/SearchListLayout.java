@@ -47,8 +47,9 @@ public class SearchListLayout extends LinearLayout {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private LinearLayout linearLayout;
-    private LinearLayout linearLayout2;
+    private LinearLayout historyLayout;
+    private LinearLayout noResultLayout;
+    private LinearLayout netErrorLayout;
     //历史搜索
     private SelfSearchListView gridViewData;
     private HistoryDataListViewAdapter historyDataAdapter;
@@ -107,8 +108,9 @@ public class SearchListLayout extends LinearLayout {
 
         tabLayout = findViewById(R.id.search_tablayout);
         viewPager = findViewById(R.id.search_tab_viewpager);
-        linearLayout = findViewById(R.id.history_list);
-        linearLayout2=findViewById(R.id.no_search_result);
+        historyLayout = findViewById(R.id.history_list);//搜索历史
+        noResultLayout = findViewById(R.id.no_search_result);//无返回结果
+        netErrorLayout = findViewById(R.id.net_error_layout);
         setLinstener();
     }
 
@@ -133,12 +135,14 @@ public class SearchListLayout extends LinearLayout {
             if (s.length() > 0) {
                 ib_searchtext_delete.setVisibility(View.VISIBLE);
                 bt_text_search_back.setText(searchtitle);
+                noResultLayout.setVisibility(View.GONE);
             } else {
                 ib_searchtext_delete.setVisibility(View.GONE);
                 tabLayout.setVisibility(View.GONE);
                 viewPager.setVisibility(View.GONE);
-                linearLayout.setVisibility(View.VISIBLE);
-                linearLayout2.setVisibility(View.GONE);
+                historyLayout.setVisibility(View.VISIBLE);
+                netErrorLayout.setVisibility(View.GONE);
+                noResultLayout.setVisibility(View.GONE);
                 bt_text_search_back.setText(backtitle);
             }
         }
@@ -223,10 +227,8 @@ public class SearchListLayout extends LinearLayout {
         TextViewItemListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String string = ((TextView) v).getText().toString();
-//                Toast.makeText(context, "Item点击" + string, Toast.LENGTH_SHORT).show();
-                executeSearch_and_NotifyDataSetChanged(string);
-
+//                String string = ((TextView) v).getText().toString();
+//                executeSearch_and_NotifyDataSetChanged(string);
             }
         };
 
@@ -235,11 +237,11 @@ public class SearchListLayout extends LinearLayout {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (sCBlistener != null) {
                     sCBlistener.Search(historyList.get(position).trim());
+                    ll_clear.setVisibility(VISIBLE);
                     et_searchtext_search.setText(historyList.get(position).trim());
                     et_searchtext_search.setCursorVisible(false);
                     et_searchtext_search.setSelection(et_searchtext_search.getText().toString().length());
-                    String str=et_searchtext_search.getText().toString();
-                    executeSearch_and_NotifyDataSetChanged(str);
+                    String str = et_searchtext_search.getText().toString();
                     //点击项移动到首部位
                     swap(historyList, position, 0);
                     historyDataAdapter.notifyDataSetChanged();
@@ -252,7 +254,7 @@ public class SearchListLayout extends LinearLayout {
 
     /**
      * @param olddatalist 历史搜索数据集合
-//     * @param hotdata     热门搜索数据集合
+     *                    //     * @param hotdata     热门搜索数据集合
      * @param sCb         事件处理监听
      * @param styleId     热门搜索样式(值在1到5之间) 可以在drawable下修改、添加 sousuo_bg_gray_X等样式背景
      */
@@ -316,8 +318,6 @@ public class SearchListLayout extends LinearLayout {
                     sCBlistener.SaveOldData(historyList);
                 }
             }
-            viewPager.setVisibility(View.VISIBLE);
-            linearLayout.setVisibility(View.GONE);
             ll_clear.setVisibility(VISIBLE);
             et_searchtext_search.setText(str);
             sCBlistener.Search(str);
