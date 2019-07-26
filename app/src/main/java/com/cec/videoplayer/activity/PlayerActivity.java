@@ -256,18 +256,18 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void getNetData(String id) {
-        StringBuilder sb = new StringBuilder();
+       /* StringBuilder sb = new StringBuilder();
         sb.append("http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
                         "?userName=");
         sb.append(user.getName());
         sb.append("&token=");
         sb.append(user.getToken());
         sb.append("&returnType=json&size=20&contentId=");
-        sb.append(id);
-//        url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
-//                "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
-//                "contentId="+ id;
-        url = sb.toString();
+        sb.append(id);*/
+        url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
+                "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                "contentId="+ id;
+//        url = sb.toString();
 
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
