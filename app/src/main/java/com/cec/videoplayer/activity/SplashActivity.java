@@ -101,11 +101,7 @@ public class SplashActivity extends Activity {
                                 }
                             }, SPLASH_DISPLAY_LENGHT);
                         }
-                    } else {
-                        initView();
-
                     }
-
                 } else {
                     runOnUiThread(new Runnable() {
                         @Override
@@ -166,16 +162,6 @@ public class SplashActivity extends Activity {
     }
 
     private void initView() {
-//        if (!isNetworkAvailable(SplashActivity.this)) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getNeteData();
-            }
-        }, SPLASH_DISPLAY_LENGHT);
-//        } else {
-
-//            } else {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
