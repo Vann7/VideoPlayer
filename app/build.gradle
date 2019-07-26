@@ -10,6 +10,10 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         javaCompileOptions { annotationProcessorOptions { includeCompileClasspath = true } }
+
+        ndk {
+            abiFilters "armeabi-v7a", "x86", "armeabi"
+        }
     }
     android.applicationVariants.all {
         variant ->
@@ -29,6 +33,13 @@ android {
         targetCompatibility = '1.8'
     }
     buildToolsVersion '28.0.3'
+
+    // Fix: More than one file was found
+//    packagingOptions {
+//        pickFirst 'lib/armeabi-v7a/libijkffmpeg.so'
+//    }
+
+
 }
 
 dependencies {
@@ -43,18 +54,19 @@ dependencies {
     implementation 'org.litepal.android:java:3.0.0'
     implementation 'org.apache.shiro:shiro-core:1.2.4'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
-    implementation 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
+//    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.6.0'
+//    implementation 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
     implementation project(path: ':jjdxm-ijkplayer')
     implementation 'com.github.bumptech.glide:glide:3.7.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.github.devlight.shadowlayout:library:1.0.2'
     //    根据需要支持去拓展，在jjdxm-ijkplayer中默认加入了armv7a的了
-    implementation 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
-    implementation 'com.dou361.ijkplayer-armv5:jjdxm-ijkplayer-armv5:1.0.0'
-    implementation 'com.dou361.ijkplayer-arm64:jjdxm-ijkplayer-arm64:1.0.0'
-    implementation 'com.dou361.ijkplayer-x86:jjdxm-ijkplayer-x86:1.0.0'
-    implementation 'com.dou361.ijkplayer-x86_64:jjdxm-ijkplayer-x86_64:1.0.0'
+//    implementation 'com.dou361.ijkplayer-armv7a:jjdxm-ijkplayer-armv7a:1.0.0'
+//    implementation 'com.dou361.ijkplayer-armv5:jjdxm-ijkplayer-armv5:1.0.0'
+//    implementation 'com.dou361.ijkplayer-arm64:jjdxm-ijkplayer-arm64:1.0.0'
+//    implementation 'com.dou361.ijkplayer-x86:jjdxm-ijkplayer-x86:1.0.0'
+//    implementation 'com.dou361.ijkplayer-x86_64:jjdxm-ijkplayer-x86_64:1.0.0'
+
     //网络获取直播视频
     implementation 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
     implementation 'com.squareup.retrofit2:converter-scalars:2.0.0'

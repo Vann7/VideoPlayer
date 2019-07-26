@@ -1,6 +1,7 @@
 package com.cec.videoplayer.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Build;
@@ -23,10 +24,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.VideoInfo;
 import com.cec.videoplayer.service.NetService;
+import com.cec.videoplayer.utils.ActivityManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
@@ -63,6 +66,8 @@ public class TabActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.tab_layout);
+        ActivityManager.getActivityManager().add(this);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             View decorView = getWindow().getDecorView();
             int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
@@ -73,7 +78,8 @@ public class TabActivity extends AppCompatActivity {
         vp_pager = findViewById(R.id.tab_viewpager);
         ImageView userLogin = findViewById(R.id.user_msg);
         userLogin.setOnClickListener(v -> {
-            Intent intent1 = new Intent(TabActivity.this, LoginActivity.class);
+            Intent intent1 = new Intent(TabActivity.this, MineActivity.class);
+
             startActivity(intent1);
         });
         EditText searchEditText = findViewById(R.id.fp_search);
@@ -81,9 +87,14 @@ public class TabActivity extends AppCompatActivity {
             Intent intent2 = new Intent(TabActivity.this, SearchActivity.class);
             startActivity(intent2);
         });
+        //已登录状态，通过上一页面加载加载数据,后期进行修改，都在本页面加载
         Bundle bundle = getIntent().getExtras();
         categoryInfos = bundle.getParcelableArrayList("categorys");
-        filter(categoryInfos);
+        if (categoryInfos != null) {
+            filter(categoryInfos);
+        }
+
+
         initView();
     }
 
@@ -337,5 +348,7 @@ public class TabActivity extends AppCompatActivity {
         }
         TabActivity.this.runOnUiThread(() -> mAdapter.notifyDataSetChanged());
     }
+
+
 
 }

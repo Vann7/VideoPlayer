@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:background="@color/topbar">
+
+        <ImageView
+            android:id="@+id/mine_back"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/back_light"/>
+
+        <TextView
+            android:id="@+id/mine_header_tv"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/home_mine"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:padding="12dip"
+            android:gravity="center"
+            />
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/mine_line_tv"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/mine_header_tv"
+        android:background="@color/black"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/text_view">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginLeft="20dp"
+            android:gravity="center_vertical"
+            android:textSize="20dp"
+            android:text="用户名"/>
+
+        <TextView
+            android:id="@+id/mine_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:layout_alignParentRight="true"
+            android:textSize="18dp"
+            android:layout_marginRight="20dp"
+            android:text="管理员"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/mine_clear_cache_rl"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/text_view">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginLeft="20dp"
+            android:gravity="center_vertical"
+            android:textSize="20dp"
+            android:text="清除缓存"/>
+
+        <TextView
+            android:id="@+id/cache_size"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:gravity="center_vertical"
+            android:layout_marginRight="20dp"
+            android:textSize="18dp"
+            android:text="0KB"
+            />
+    </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/mine_out_tv"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/login_button_selector"
+        android:text="退出当前账号"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"/>
+
+    <TextView
+        android:id="@+id/mine_login_tv"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/login_button_selector"
+        android:text="登录账号"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"/>
+
+</LinearLayout>

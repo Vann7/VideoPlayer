@@ -10,12 +10,10 @@ import java.io.Serializable;
  */
 public class User extends LitePalSupport implements Serializable {
     private int id;
-    private String mId;
     @Column(nullable = false)
     private String name;
     private String password;
-    private boolean isEdited; //是否已编辑
-    private boolean appUpdate; //是否可以更新信息
+    private String token; // 用户凭据
 
     public User(){}
 
@@ -24,10 +22,10 @@ public class User extends LitePalSupport implements Serializable {
         this.password = password;
     }
 
-    public User(String name, String password, boolean appUpdate) {
+    public User(String name, String password, String token) {
         this.name = name;
         this.password = password;
-        this.appUpdate = appUpdate;
+        this.token = token;
     }
 
     @Override
@@ -63,27 +61,11 @@ public class User extends LitePalSupport implements Serializable {
         this.password = password;
     }
 
-    public String getmId() {
-        return mId;
+    public String getToken() {
+        return token;
     }
 
-    public void setmId(String mId) {
-        this.mId = mId;
-    }
-
-    public boolean isEdited() {
-        return isEdited;
-    }
-
-    public void setEdited(boolean edited) {
-        isEdited = edited;
-    }
-
-    public boolean isAppUpdate() {
-        return appUpdate;
-    }
-
-    public void setAppUpdate(boolean appUpdate) {
-        this.appUpdate = appUpdate;
+    public void setToken(String token) {
+        this.token = token;
     }
 }
