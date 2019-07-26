@@ -1,1 +1,2 @@
 include ':app', 'jjdxm-ijkplayer', ':library', ':LazyCache'
+include ':app', 'jjdxm-ijkplayer', ':library', ':ijkplayer-armv7a', ':ijkplayer-java'

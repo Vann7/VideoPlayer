@@ -2,6 +2,7 @@ package com.cec.videoplayer.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -24,24 +25,34 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
+import com.cec.videoplayer.adapter.PriorityVideoAdapter;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.VideoInfo;
 import com.cec.videoplayer.service.NetService;
 import com.cec.videoplayer.utils.FileUtil;
+import com.cec.videoplayer.utils.ActivityManager;
+import com.cec.videoplayer.view.RotationImageView;
+import com.cec.videoplayer.view.VideoListGridView;
+import com.cec.videoplayer.view.VideoScrollView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshGridView;
 import com.cec.videoplayer.adapter.VideoListAdapter;
+import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import okhttp3.Call;
@@ -62,6 +73,7 @@ public class TabActivity extends AppCompatActivity {
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
     private NetService netService = new NetService();
     private ContentInfo contentInfo;
+    private HashMap<String, VideoScrollView> mScrollViews = new HashMap<>();
 
 
     @Override
@@ -69,6 +81,8 @@ public class TabActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.tab_layout);
+        ActivityManager.getActivityManager().add(this);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             View decorView = getWindow().getDecorView();
             int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
@@ -79,7 +93,8 @@ public class TabActivity extends AppCompatActivity {
         vp_pager = findViewById(R.id.tab_viewpager);
         ImageView userLogin = findViewById(R.id.user_msg);
         userLogin.setOnClickListener(v -> {
-            Intent intent1 = new Intent(TabActivity.this, LoginActivity.class);
+            Intent intent1 = new Intent(TabActivity.this, MineActivity.class);
+
             startActivity(intent1);
         });
         EditText searchEditText = findViewById(R.id.fp_search);
@@ -87,9 +102,14 @@ public class TabActivity extends AppCompatActivity {
             Intent intent2 = new Intent(TabActivity.this, SearchActivity.class);
             startActivity(intent2);
         });
+        //已登录状态，通过上一页面加载加载数据,后期进行修改，都在本页面加载
         Bundle bundle = getIntent().getExtras();
         categoryInfos = bundle.getParcelableArrayList("categorys");
-        filter(categoryInfos);
+        if (categoryInfos != null) {
+            filter(categoryInfos);
+        }
+
+
         initView();
     }
 
@@ -123,70 +143,49 @@ public class TabActivity extends AppCompatActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             //判断当前是否存在gridview
-            PullToRefreshGridView gridView = null;
-            VideoListAdapter videoListAdapter = null;
-            List<VideoInfo> videoList = null;
-            LinearLayout layout = null;
+            VideoScrollView scrollView = null;
+
             for (int i = 0; i < container.getChildCount(); ++i) {
-                layout = (LinearLayout) container.getChildAt(i);
-                if (layout.getChildAt(0).getId() == position) {
-                    gridView = (PullToRefreshGridView) layout.getChildAt(0);
+                if (container.getChildAt(i).getId() == position) {
+                    scrollView = mScrollViews.get(position + "");
                     break;
-                } else {
-                    layout = null;
                 }
             }
-            if (gridView == null) {
-                layout = new LinearLayout(TabActivity.this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-                LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-                layout.setLayoutParams(layoutParams);
-
-                gridView = new PullToRefreshGridView(TabActivity.this);
-                gridView.setId(position);
-                setVideoGridViewStyle(gridView);
-                gridView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<GridView>() {
+            if (scrollView == null) {
+                scrollView = new VideoScrollView(TabActivity.this);
+                mScrollViews.put(position + "", scrollView);
+                scrollView.initScrollView();
+                scrollView.initScrollViewChildren();
+                scrollView.getmScrollView().setId(position);
+                scrollView.getmScrollView().setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ScrollView>() {
                     @Override
-                    public void onPullDownToRefresh(PullToRefreshBase<GridView> refreshView) {
-                        ((VideoListAdapter) (refreshView.getRefreshableView().getAdapter())).clear();
+                    public void onPullDownToRefresh(PullToRefreshBase<ScrollView> refreshView) {
+                        ((VideoListAdapter)((VideoListGridView)((LinearLayout)refreshView.getRefreshableView().getChildAt(0)).getChildAt(1)).getAdapter()).clear();
                         if (position != 0) {
-                            getVideoListByCateId(mList.get(position).getId(), (PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
+                            getVideoListByCateId(mList.get(position).getId(), (PullToRefreshScrollView) refreshView,
+                                    (VideoListAdapter) ((VideoListGridView)((LinearLayout)refreshView.getRefreshableView().getChildAt(0)).getChildAt(1)).getAdapter());
                         } else {
-                            getVideoListBySiteId((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
+                            getVideoListBySiteId((PullToRefreshScrollView) refreshView,
+                                    (VideoListAdapter)((VideoListGridView)((LinearLayout)refreshView.getRefreshableView().getChildAt(0)).getChildAt(1)).getAdapter());
                         }
                     }
 
                     @Override
-                    public void onPullUpToRefresh(PullToRefreshBase<GridView> refreshView) {
+                    public void onPullUpToRefresh(PullToRefreshBase<ScrollView> refreshView) {
                         if (position != 0) {
-                            getVideoListByCateId(mList.get(position).getId(), (PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
+                            getVideoListByCateId(mList.get(position).getId(), (PullToRefreshScrollView) refreshView,
+                                    (VideoListAdapter) ((VideoListGridView)((LinearLayout)refreshView.getRefreshableView().getChildAt(0)).getChildAt(1)).getAdapter());
                         } else {
-                            getVideoListBySiteId((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter());
+                            getVideoListBySiteId((PullToRefreshScrollView) refreshView,
+                                    (VideoListAdapter)((VideoListGridView)((LinearLayout)refreshView.getRefreshableView().getChildAt(0)).getChildAt(1)).getAdapter());
                         }
                     }
                 });
-                gridView.setOnItemClickListener((parent, v, positions, id) -> {
-//                    if (!isNetworkAvailable(TabActivity.this)) {
-//                        if (isWifi(TabActivity.this)) {
-//                            net = 1;
-//                            Intent intent = new Intent(TabActivity.this, NoNetworkActivity.class);
-//                            intent.putExtra("netType", net);
-//                            startActivity(intent);
-//                        } else if (isMobile(TabActivity.this)) {
-//                            net = 2;
-//                            Intent intent = new Intent(TabActivity.this, NoNetworkActivity.class);
-//                            intent.putExtra("netType", net);
-//                            startActivity(intent);
-//                        } else {
-//                            Intent intent = new Intent(TabActivity.this, NoNetworkActivity.class);
-//                            startActivity(intent);
-//                        }
-//                    }
-//                    else {
-                        VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
-                        String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
-                                "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
-                                "contentId=" + videoInfo.getId();
+                scrollView.getmVideoListGridView().setOnItemClickListener((parent, v, positions, id) -> {
+                    VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
+                    String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
+                            "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                            "contentId=" + videoInfo.getId();
 
                         new Thread(() -> {
                             OkHttpClient client = new OkHttpClient();
@@ -228,45 +227,79 @@ public class TabActivity extends AppCompatActivity {
 
                             });
                         }).start();
-//                    }
                 });
-                videoList = new ArrayList<VideoInfo>();
-                videoListAdapter = new VideoListAdapter(TabActivity.this, R.layout.video_item, videoList);
-                gridView.setAdapter(videoListAdapter);
-
-                layout.addView(gridView);
-                container.addView(layout);
+                container.addView(scrollView.getmScrollView());
             }
-            ((VideoListAdapter) gridView.getRefreshableView().
-
-                    getAdapter()).
-
-                    clear();
+            ((VideoListAdapter) scrollView.getmVideoListGridView().getAdapter()).clear();
+            scrollView.getmRotationImageView().getmPriorityAdapter().getmList().clear();
+            scrollView.getmRotationImageView().getmPriorityAdapter().notifyDataSetChanged();
+            scrollView.getmRotationImageView().getmHandler().removeMessages(0);
             if (position != 0) {
-                getVideoListByCateId(mList.get(position).getId(), gridView, (VideoListAdapter) gridView.getRefreshableView().getAdapter());
+                getVideoListByCateId(mList.get(position).getId(), scrollView.getmScrollView(), scrollView.getmVideoListAdapter());
+                getVideoListOfPriorityCate(mList.get(position).getId(), scrollView.getmScrollView(), scrollView.getmRelativeLayout(), scrollView.getmRotationImageView());
             } else {
-                getVideoListBySiteId(gridView, (VideoListAdapter) gridView.getRefreshableView().getAdapter());
+                getVideoListOfPriority(scrollView.getmScrollView(), scrollView.getmRelativeLayout(), scrollView.getmRotationImageView());
+                getVideoListBySiteId(scrollView.getmScrollView(), scrollView.getmVideoListAdapter());
             }
-            return layout;
+            return scrollView.getmScrollView();
         }
 
-        //设置视频列表的样式
-        public void setVideoGridViewStyle(PullToRefreshGridView view) {
-            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(10, 10, 10, 0);
+        //获取首页推荐的内容
+        public void getVideoListOfPriority(PullToRefreshScrollView scrollView, RelativeLayout relativeLayout, RotationImageView rotationImageView){
+            new Thread(() -> {
+                String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&orderType=priority&siteId=" + netService.getSiteId();
+                OkHttpClient client = new OkHttpClient();
+                final Request request = new Request.Builder()
+                        .url(url)
+                        .get()
+                        .build();
+                //异步加载
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d("load", "onFailure");
+                    }
 
-            view.setLayoutParams(layoutParams);
-            view.setGravity(Gravity.CENTER);
-            view.getRefreshableView().setHorizontalSpacing(10);
-            view.getRefreshableView().setVerticalSpacing(5);
-            view.getRefreshableView().setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-            view.getRefreshableView().setNumColumns(2);
-            view.setMode(PullToRefreshBase.Mode.BOTH);
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        response = client.newCall(request).execute();
+                        //将视频信息json转成类对象
+                        List<VideoInfo> videoInfoList = convertVideoFromJson(response.body().string());
+                        refreshPriorityToViewPager(videoInfoList, scrollView, relativeLayout, rotationImageView);
+                        response.body().close();
+                    }
+                });
+            }).start();
         }
+        //获取其他栏目推荐的内容
+        public void getVideoListOfPriorityCate(String cateId, PullToRefreshScrollView scrollView, RelativeLayout relativeLayout, RotationImageView rotationImageView){
+            new Thread(() -> {
+                String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&orderType=priority&cateId=" + cateId;
+                OkHttpClient client = new OkHttpClient();
+                final Request request = new Request.Builder()
+                        .url(url)
+                        .get()
+                        .build();
+                //异步加载
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d("load", "onFailure");
+                    }
 
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        response = client.newCall(request).execute();
+                        //将视频信息json转成类对象
+                        List<VideoInfo> videoInfoList = convertVideoFromJson(response.body().string());
+                        refreshPriorityToViewPager(videoInfoList, scrollView, relativeLayout, rotationImageView);
+                        response.body().close();
+                    }
+                });
+            }).start();
+        }
         //根据栏目ID获取视频列表
-        public void getVideoListByCateId(String cateId, PullToRefreshGridView
-                gridView, VideoListAdapter adapter) {
+        public void getVideoListByCateId(String cateId, PullToRefreshScrollView scrollView, VideoListAdapter adapter) {
             new Thread(() -> {
                 String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&cateId=" + cateId;
                 OkHttpClient client = new OkHttpClient();
@@ -285,16 +318,15 @@ public class TabActivity extends AppCompatActivity {
                     public void onResponse(Call call, Response response) throws IOException {
                         response = client.newCall(request).execute();
                         //将视频信息json转成类对象
-                        convertVideoFromJson(response.body().string(), gridView, adapter);
+                        List<VideoInfo> videoInfoList = convertVideoFromJson(response.body().string());
+                        refreshVideoListToGridView(videoInfoList, scrollView, adapter);
                         response.body().close();
                     }
                 });
             }).start();
         }
-
         //根据站点id获取视频列表
-        public void getVideoListBySiteId(PullToRefreshGridView gridView, VideoListAdapter
-                adapter) {
+        public void getVideoListBySiteId(PullToRefreshScrollView scrollView, VideoListAdapter adapter) {
             new Thread(() -> {
                 String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentList.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&siteId=" + netService.getSiteId();
                 OkHttpClient client = new OkHttpClient();
@@ -313,7 +345,8 @@ public class TabActivity extends AppCompatActivity {
                     public void onResponse(Call call, Response response) throws IOException {
                         response = client.newCall(request).execute();
                         //将视频信息json转成类对象
-                        convertVideoFromJson(response.body().string(), gridView, adapter);
+                        List<VideoInfo> videoInfoList = convertVideoFromJson(response.body().string());
+                        refreshVideoListToGridView(videoInfoList, scrollView, adapter);
                         response.body().close();
                     }
                 });
@@ -321,17 +354,39 @@ public class TabActivity extends AppCompatActivity {
         }
 
         //将视频列表由json格式转换成类数组
-        public void convertVideoFromJson(String json, PullToRefreshGridView
-                gridView, VideoListAdapter adapter) {
+        public List<VideoInfo> convertVideoFromJson(String json) {
             Gson gson = new Gson();
-            List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {
-            }.getType());
+            List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {}.getType());
+            return videoInfoList;
+        }
+        //更新视频列表到gridview
+        public void refreshVideoListToGridView(List<VideoInfo> videoInfoList, PullToRefreshScrollView scrollView, VideoListAdapter adapter){
             TabActivity.this.runOnUiThread(() -> {
                 for (int i = 0; i < videoInfoList.size(); ++i) {
                     adapter.add(videoInfoList.get(i));
                 }
-                gridView.onRefreshComplete();
+                scrollView.onRefreshComplete();
             });
+        }
+        //更新推荐视频到轮播图控件
+        public void refreshPriorityToViewPager(List<VideoInfo> videoInfoList, PullToRefreshScrollView scrollView, RelativeLayout relativeLayout, RotationImageView rotationImageView){
+            if(videoInfoList.size() == 0){
+                TabActivity.this.runOnUiThread(() -> relativeLayout.setVisibility(View.GONE));
+                return;
+            }
+            else if(videoInfoList.size() == 1){
+                rotationImageView.getmImageList().add(videoInfoList.get(0));
+            }
+            else{
+                rotationImageView.getmImageList().add(videoInfoList.get(videoInfoList.size() - 1));
+                for(int i = 0; i < videoInfoList.size(); ++i){
+                    rotationImageView.getmImageList().add(videoInfoList.get(i));
+                }
+                rotationImageView.getmImageList().add(videoInfoList.get(0));
+            }
+            TabActivity.this.runOnUiThread(() -> rotationImageView.getmPriorityAdapter().notifyDataSetChanged());
+            TabActivity.this.runOnUiThread(() -> rotationImageView.initCircles());
+            TabActivity.this.runOnUiThread(() -> scrollView.onRefreshComplete());
         }
 
         @Override
@@ -418,5 +473,7 @@ public class TabActivity extends AppCompatActivity {
         }
         TabActivity.this.runOnUiThread(() -> mAdapter.notifyDataSetChanged());
     }
+
+
 
 }

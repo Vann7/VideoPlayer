@@ -2,6 +2,7 @@ package com.cec.videoplayer.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.adapter.RelateAdapter;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.ContentInfo;
 import com.cec.videoplayer.module.Relate;
 import com.cec.videoplayer.utils.PlayHitstUtil;
@@ -148,6 +150,7 @@ public class SimpleVrVideoActivity extends Activity  implements View.OnClickList
     private List<Relate> mList;
     private String id;
     private String url;
+    private User user;
 
 
 
@@ -155,8 +158,8 @@ public class SimpleVrVideoActivity extends Activity  implements View.OnClickList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple_vr_video);
-
         id = getIntent().getStringExtra("id");
+        getSession();
         initView();
         initEvent();
         getNetData(id);
@@ -209,6 +212,17 @@ public class SimpleVrVideoActivity extends Activity  implements View.OnClickList
     }
 
     private void getNetData(String id) {
+
+     /*   StringBuilder sb = new StringBuilder();
+        sb.append("http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
+                "?userName=");
+        sb.append(user.getName());
+        sb.append("&token=");
+        sb.append(user.getToken());
+        sb.append("&returnType=json&size=20&contentId=");
+        sb.append(id);
+        url = sb.toString();*/
+
         url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
                 "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
                 "contentId="+ id;
@@ -395,6 +409,15 @@ public class SimpleVrVideoActivity extends Activity  implements View.OnClickList
     }
 
     /**
+     * 获取当前用户session信息, 用于默认加载上次登录用户
+     */
+    private void getSession() {
+        SharedPreferences setting = this.getSharedPreferences("User", 0);
+        user = new User(setting.getString("name", ""), setting.getString("password", "")
+                , setting.getString("token", ""));
+    }
+
+    /**
      * When the user manipulates the seek bar, update the video position.
      */
     private class SeekBarListener implements SeekBar.OnSeekBarChangeListener {
@@ -495,5 +518,6 @@ public class SimpleVrVideoActivity extends Activity  implements View.OnClickList
             return true;
         }
     }
+
 }
 

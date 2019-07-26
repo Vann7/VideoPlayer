@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -34,6 +35,7 @@ import com.cec.videoplayer.adapter.CommentAdapter;
 import com.cec.videoplayer.adapter.ContentAdapter;
 import com.cec.videoplayer.adapter.FilesAdapter;
 import com.cec.videoplayer.adapter.RelateAdapter;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.module.Comment;
 import com.cec.videoplayer.module.ContentInfo;
@@ -90,6 +92,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private View view_file;
     private RelativeLayout rl_player;
 
+    private User user;
+
     private RecyclerView rv_content_files;
     private FilesAdapter mAdapter;
     private LinearLayoutManager layoutManager;
@@ -129,6 +133,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         this.mContext = this;
         setContentView(R.layout.activity_player);
         id = getIntent().getStringExtra("id");
+        getSession();
         initView();
         initEvent();
         authority();
@@ -216,11 +221,11 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
              player.setPlaySource(contentInfo.getFiles().get(position).getPlayurl())
                     .startPlay();
 
-           /* String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
-            String h265 = getLocalVideoPath("e40651e289f14cbdbc8e425f17cded9b.mp4");
+//            String h264 = getLocalVideoPath("c2282f525c494dc7ace426cc5c08fa3f.mp4");
+//            String h265 = getLocalVideoPath("video-h265.mkv");
 
-            player.setPlaySource((position == 0) ? h264 : h265 )
-                    .startPlay();*/
+//            player.setPlaySource((position == 0) ? h264 : h265 )
+//                    .startPlay();
         });
 
 
@@ -251,9 +256,18 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void getNetData(String id) {
+       /* StringBuilder sb = new StringBuilder();
+        sb.append("http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
+                        "?userName=");
+        sb.append(user.getName());
+        sb.append("&token=");
+        sb.append(user.getToken());
+        sb.append("&returnType=json&size=20&contentId=");
+        sb.append(id);*/
         url = "http://115.28.215.145:8080/powercms/api/ContentApi-getContentInfo.action" +
                 "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
                 "contentId="+ id;
+//        url = sb.toString();
 
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
@@ -282,43 +296,51 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     public void initModel(String json) {
         Gson gson = new Gson();
         List<ContentInfo> infos = gson.fromJson(json,new TypeToken<List<ContentInfo>>() {}.getType());
+        if (infos != null && infos.size() >= 2) {
+            contentInfo = infos.get(0);
+            relateList = infos.get(1).getRelates();
+            if (contentInfo.getFiles() != null && contentInfo.getFiles().size() > 0) {
+                //子线程刷新UI
+                PlayerActivity.this.runOnUiThread(() -> {
+                    String url = contentInfo.getFiles().get(0).getPlayurl();
+                    player.setPlaySource(url)
+                            .showThumbnail(ivThumbnail -> Glide.with(mContext)
+                                    .load(contentInfo.getImage())
+                                    .placeholder(R.color.cl_default)
+                                    .error(R.color.cl_error)
+                                    .into(ivThumbnail))
+                            .startPlay();
 
-        contentInfo = infos.get(0);
-        relateList = infos.get(1).getRelates();
-        if (contentInfo.getFiles().size() > 0) {
-            //子线程刷新UI
-            PlayerActivity.this.runOnUiThread(() -> {
-                String url = contentInfo.getFiles().get(0).getPlayurl();
-//            String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
-//            String url = "http://115.28.215.145:3880/D:/mediaupload/602f134a2548423786b861830607ca46.mp41.mp4";
-                player.setPlaySource(url)
-                        .showThumbnail(ivThumbnail -> Glide.with(mContext)
-                                .load(contentInfo.getImage())
-                                .placeholder(R.color.cl_default)
-                                .error(R.color.cl_error)
-                                .into(ivThumbnail))
-                        .startPlay();
-//            String playUrl = contentInfo.getFiles().get(0).getPlayurl();
-//            player.setPlaySource(playUrl);
 
-                relAdapter.onDateChange(relateList);
+                    relAdapter.onDateChange(relateList);
 
-                tv_title.setText(contentInfo.getTitle());
-                tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
-                tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
+                    tv_title.setText(contentInfo.getTitle());
+                    tv_hits.setText(PlayHitstUtil.getCount(contentInfo.getHits()));
+                    tv_updateTime.setText( contentInfo.getUpdateTime() + "发布");
 
-                if (contentInfo.getFiles().size() > 1) {
-                    rv_content_files.setVisibility(View.VISIBLE);
-                    view_file.setVisibility(View.VISIBLE);
-                    mAdapter.onDateChange(contentInfo.getFiles());
-                } else {
-                    rv_content_files.setVisibility(View.GONE);
-                    view_file.setVisibility(View.GONE);
-                }
-            });
+                    if (contentInfo.getFiles().size() > 1) {
+                        rv_content_files.setVisibility(View.VISIBLE);
+                        view_file.setVisibility(View.VISIBLE);
+                        mAdapter.onDateChange(contentInfo.getFiles());
+                    } else {
+                        rv_content_files.setVisibility(View.GONE);
+                        view_file.setVisibility(View.GONE);
+                    }
+                });
+            } else {
+                PlayerActivity.this.runOnUiThread(() -> {
+                    ToastUtils.showLong("无法播放");
+                });
+
+                this.finish();
+            }
         } else {
-            ToastUtils.showLong("无播放文件!");
+            PlayerActivity.this.runOnUiThread(() -> {
+                ToastUtils.showLong("无法播放");
+            });
+            this.finish();
         }
+
 
     }
 
@@ -541,5 +563,15 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
     }
+
+    /**
+     * 获取当前用户session信息, 用于默认加载上次登录用户
+     */
+    private void getSession() {
+        SharedPreferences setting = this.getSharedPreferences("User", 0);
+        user = new User(setting.getString("name", ""), setting.getString("password", "")
+        , setting.getString("token", ""));
+    }
+
 
 }

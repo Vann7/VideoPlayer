@@ -3,6 +3,7 @@ package com.cec.videoplayer.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -16,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.cec.videoplayer.R;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.service.NetService;
 import com.cec.videoplayer.utils.FileUtil;
@@ -46,6 +48,8 @@ public class SplashActivity extends Activity {
     private String json;
     private String filePath = Environment.getExternalStorageDirectory().getPath() + "/VideoPlayer/category.txt";
     private File fileName;
+    private boolean isLogin;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +63,8 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_splash);
         fileName = new File(filePath);
         PermissionUtils.isGrantExternalRW(SplashActivity.this, 1);
+//        getSession();
+        initView();
     }
 
     @Override
@@ -113,6 +119,40 @@ public class SplashActivity extends Activity {
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+//    private void initView() {
+//            if (!isNetworkAvailable(SplashActivity.this)) {
+//                if (isWifi(SplashActivity.this)) {
+//                    net = 1;
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
+//                            intent.putExtra("netType", net);
+//                            startActivity(intent);
+//                            SplashActivity.this.finish();
+//                        }
+//                    }, SPLASH_DISPLAY_LENGHT);
+//                } else if (isMobile(SplashActivity.this)) {
+//                    net = 2;
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
+//                            intent.putExtra("netType", net);
+//                            startActivity(intent);
+//                            SplashActivity.this.finish();
+//                        }
+//                    }, SPLASH_DISPLAY_LENGHT);
+//                } else {
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
+//                            startActivity(intent);
+//                            SplashActivity.this.finish();
+//                        }
+//                    }, SPLASH_DISPLAY_LENGHT);
+//                }}}
 
     @Override
     protected void onResume() {
@@ -135,6 +175,13 @@ public class SplashActivity extends Activity {
         }, SPLASH_DISPLAY_LENGHT);
 //        } else {
 
+//            } else {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getNeteData();
+            }
+        }, SPLASH_DISPLAY_LENGHT);
     }
 
 
@@ -251,5 +298,11 @@ public class SplashActivity extends Activity {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo();
+    }
+
+    private void getSession() {
+        SharedPreferences setting = this.getSharedPreferences("User", 0);
+        user = new User(setting.getString("name", ""), setting.getString("password", ""));
+        isLogin = setting.getBoolean("isLogin", false);
     }
 }
