@@ -61,15 +61,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         //判断当前栈中是否已存在LoginActivity
-       boolean flag =  ActivityManager.isExistActivity(LoginActivity.class);
-       if (!flag) {
-           ActivityManager.getActivityManager().add(this);
-       }
+//       boolean flag =  ActivityManager.isExistActivity(LoginActivity.class);
+//       if (!flag) {
+//           ActivityManager.getActivityManager().add(this);
+//       }
        //关闭除当前activity外的所有activity
-        ActivityManager.finish(this);
+//        ActivityManager.finish(this);
 
         getSession();
-        authority();
+//        authority();
         init();
     }
 
@@ -116,9 +116,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 //                login();
                 user = new User("demo1", "123456","f620969ebe7a0634c0aabc1b4fecf1ab" );
                 saveSession(user);
-                Intent intent = new Intent(LoginActivity.this, TabActivity.class);
-                startActivity(intent);
-                this.finish();
+                this.setResult(RESULT_OK);
+                LoginActivity.this.finish();
                 break;
         }
 

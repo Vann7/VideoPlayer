@@ -55,7 +55,7 @@ public class SplashActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_splash);
-        getSession();
+//        getSession();
         initView();
     }
     @Override
@@ -69,11 +69,6 @@ public class SplashActivity extends Activity {
         super.onResume();
     }
     private void initView() {
-        if (!isLogin) {
-            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-            startActivity(intent);
-            this.finish();
-        } else {
             if (!isNetworkAvailable(SplashActivity.this)) {
                 if (isWifi(SplashActivity.this)) {
                     net = 1;
@@ -116,7 +111,6 @@ public class SplashActivity extends Activity {
                     }
                 }, SPLASH_DISPLAY_LENGHT);
             }
-        }
 
     }
 

@@ -60,7 +60,6 @@ public class TabActivity extends AppCompatActivity {
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
     private NetService netService = new NetService();
     private ContentInfo contentInfo;
-    private boolean isLogin;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,8 +67,6 @@ public class TabActivity extends AppCompatActivity {
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.tab_layout);
         ActivityManager.getActivityManager().add(this);
-
-        getSession();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             View decorView = getWindow().getDecorView();
@@ -91,14 +88,12 @@ public class TabActivity extends AppCompatActivity {
             startActivity(intent2);
         });
         //已登录状态，通过上一页面加载加载数据,后期进行修改，都在本页面加载
-        if (isLogin) {
-            Bundle bundle = getIntent().getExtras();
-            categoryInfos = bundle.getParcelableArrayList("categorys");
-            if (categoryInfos != null) {
-                filter(categoryInfos);
-            }
-
+        Bundle bundle = getIntent().getExtras();
+        categoryInfos = bundle.getParcelableArrayList("categorys");
+        if (categoryInfos != null) {
+            filter(categoryInfos);
         }
+
 
         initView();
     }
@@ -355,9 +350,5 @@ public class TabActivity extends AppCompatActivity {
     }
 
 
-    private void getSession() {
-        SharedPreferences setting = this.getSharedPreferences("User", 0);
-        isLogin = setting.getBoolean("isLogin", false);
-    }
 
 }
