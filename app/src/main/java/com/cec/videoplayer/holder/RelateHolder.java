@@ -9,8 +9,6 @@ import com.cec.videoplayer.R;
 import com.cec.videoplayer.module.Relate;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-
 /**
  * User: cec
  * Date: 2019/7/4
@@ -36,7 +34,7 @@ public class RelateHolder {
                 .load(relate.getImage())
                     .placeholder(R.mipmap.mis_default_error)
                 .centerCrop()
-                .resize(60, 60)
+                .resize(120, 80)
                 .into(iv_image);
 
     }

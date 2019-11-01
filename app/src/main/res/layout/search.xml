@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.handmark.pulltorefresh.library.PullToRefreshGridView
+    <com.cec.videoplayer.view.PullToRefreshGridView
         android:id="@+id/pull_refresh_grid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         android:numColumns="2"
         android:verticalSpacing="10dp">
 
-    </com.handmark.pulltorefresh.library.PullToRefreshGridView>
+    </com.cec.videoplayer.view.PullToRefreshGridView>
     <!--<TextView-->
     <!--android:id="@+id/tv_show"-->
     <!--android:textSize="30sp"-->

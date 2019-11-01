@@ -7,22 +7,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
 
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
-
-        <!-- <activity -->
-        <!-- android:name=".activity.MainActivity" -->
-        <!-- android:launchMode="singleTask"> -->
-
         <activity
             android:name=".activity.SplashActivity"
             android:screenOrientation="portrait"
@@ -34,17 +26,12 @@
                 <category android:name="com.google.intent.category.CARDBOARD" />
             </intent-filter>
         </activity>
+
         <activity
-            android:name=".activity.TabActivity"
+            android:name=".activity.MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.SearchActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.SearchResultActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activity.NoNetworkActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.LoginActivity"
@@ -53,16 +40,20 @@
             android:name=".activity.PlayerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait" />
-        <!-- <activity android:name=".activity.ContentListActivity"/> -->
 
         <activity
-            android:name=".activity.SimpleVrVideoActivity"
+            android:name=".activity.VrVideoActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait" />
+
         <activity android:name=".activity.P2PActivity" />
         <activity
+            android:name=".activity.LiveActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activity.MineActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
+import com.cec.videoplayer.R;
+import com.cec.videoplayer.holder.CommentHolder;
 import com.cec.videoplayer.holder.RelateHolder;
 import com.cec.videoplayer.module.Comment;
 import com.cec.videoplayer.module.Relate;
@@ -22,7 +24,7 @@ public class CommentAdapter extends BaseAdapter {
     private List<Comment> mList;
     private LayoutInflater mInflater; //布局装载器对象
     private Context mContext;
-    private RelateHolder viewHolder;
+    private CommentHolder viewHolder;
     private ListView mListView;
     private OnListClickListener mListener;
 
@@ -42,22 +44,34 @@ public class CommentAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 0;
+        return mList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return mList.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return null;
+        if (convertView == null) {
+            // 由于我们只需要将XML转化为View，并不涉及到具体的布局，所以第二个参数通常设置为null
+            convertView = mInflater.inflate(R.layout.comment_item, null);
+            viewHolder = new CommentHolder(convertView, mContext);
+            //通过setTag将convertView与viewHolder关联
+            convertView.setTag(viewHolder);
+        }else {
+            viewHolder = (CommentHolder) convertView.getTag();
+        }
+        if (viewHolder != null) {
+            viewHolder.bindData(mList.get(position));
+        }
+        return convertView;
     }
 
     public void setOnListClickListener(OnListClickListener mListener) {
@@ -65,8 +79,8 @@ public class CommentAdapter extends BaseAdapter {
     }
 
 
-    public void onDateChange(List<Comment> relateList) {
-        mList = relateList;
+    public void onDateChange(List<Comment> commentList) {
+        mList = commentList;
         this.notifyDataSetChanged();
     }
 

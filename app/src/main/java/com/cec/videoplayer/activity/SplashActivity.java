@@ -3,30 +3,31 @@ package com.cec.videoplayer.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Parcelable;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.View;
+import android.widget.Toast;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.module.CategoryInfo;
-import com.cec.videoplayer.service.NetService;
+import com.cec.videoplayer.module.NetValue;
 import com.cec.videoplayer.utils.FileUtil;
 import com.cec.videoplayer.utils.PermissionUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,35 +37,31 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import android.os.Parcelable;
-import android.widget.Toast;
 
-
-public class SplashActivity extends Activity {
-    private final int SPLASH_DISPLAY_LENGHT = 1;
+public class SplashActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback {
+    private final int SPLASH_DISPLAY_LENGHT = 1000;
     private List<CategoryInfo> tcategoryInfos = new ArrayList<>();
-    private int net = 0;
-    private NetService netService = new NetService();
-    private String json;
+    private NetValue netValue = new NetValue();
     private String filePath = Environment.getExternalStorageDirectory().getPath() + "/VideoPlayer/category.txt";
     private File fileName;
-    private boolean isLogin;
-    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.AppTheme);
-        //去除title
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        //去掉Activity上面的状态栏
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if(Build.VERSION.SDK_INT >= 21) {
+            View decorView = getWindow().getDecorView();
+            //设置让应用主题内容占据状态栏和导航栏
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(option);
+            //设置状态栏和导航栏颜色为透明
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        }
         setContentView(R.layout.activity_splash);
         fileName = new File(filePath);
-        PermissionUtils.isGrantExternalRW(SplashActivity.this, 1);
-//        getSession();
-        initView();
+        if (PermissionUtils.isGrantExternalRW(SplashActivity.this, 1)) {
+            initView();
+        }
     }
 
     @Override
@@ -84,6 +81,9 @@ public class SplashActivity extends Activity {
                                         Gson gson = new Gson();
                                         tcategoryInfos = gson.fromJson(str, new TypeToken<List<CategoryInfo>>() {
                                         }.getType());
+                                    } else {
+                                        Toast.makeText(SplashActivity.this, "当前设备无可用网络，初始化失败。", Toast.LENGTH_LONG).show();
+                                        finish();
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -92,7 +92,7 @@ public class SplashActivity extends Activity {
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Intent intent = new Intent(SplashActivity.this, TabActivity.class);
+                                    Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                                     Bundle bundle = new Bundle();
                                     bundle.putParcelableArrayList("categorys", (ArrayList<? extends Parcelable>) tcategoryInfos);
                                     intent.putExtras(bundle);
@@ -101,12 +101,14 @@ public class SplashActivity extends Activity {
                                 }
                             }, SPLASH_DISPLAY_LENGHT);
                         }
+                    } else {
+                        initView();
                     }
                 } else {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(SplashActivity.this, "为保证正常运行，请授权使用存储权限。", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SplashActivity.this, "为保证正常运行，请授权使用存储权限。", Toast.LENGTH_LONG).show();
                             finish();
                         }
                     });
@@ -115,40 +117,6 @@ public class SplashActivity extends Activity {
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
-//    private void initView() {
-//            if (!isNetworkAvailable(SplashActivity.this)) {
-//                if (isWifi(SplashActivity.this)) {
-//                    net = 1;
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
-//                            intent.putExtra("netType", net);
-//                            startActivity(intent);
-//                            SplashActivity.this.finish();
-//                        }
-//                    }, SPLASH_DISPLAY_LENGHT);
-//                } else if (isMobile(SplashActivity.this)) {
-//                    net = 2;
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
-//                            intent.putExtra("netType", net);
-//                            startActivity(intent);
-//                            SplashActivity.this.finish();
-//                        }
-//                    }, SPLASH_DISPLAY_LENGHT);
-//                } else {
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Intent intent = new Intent(SplashActivity.this, NoNetworkActivity.class);
-//                            startActivity(intent);
-//                            SplashActivity.this.finish();
-//                        }
-//                    }, SPLASH_DISPLAY_LENGHT);
-//                }}}
 
     @Override
     protected void onResume() {
@@ -172,15 +140,39 @@ public class SplashActivity extends Activity {
 
 
     private void getNeteData() {
-        new Thread(() -> {
-            String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getCategoryInfo.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json";
-            OkHttpClient client = new OkHttpClient();
-            final Request request = new Request.Builder()
-                    .url(url)
-                    .get()
-                    .build();
+        if (!isNetworkAvailable(SplashActivity.this)) {
+            String sdCard = Environment.getExternalStorageState();
+            if (sdCard.equals(Environment.MEDIA_MOUNTED)) {
+                FileUtil.createSDCardDir();
+                if (fileName.exists()) {
+                    try {
+                        String str = FileUtil.readTxtFile(fileName);
+                        if (str != "") {
+                            Gson gson = new Gson();
+                            tcategoryInfos = gson.fromJson(str, new TypeToken<List<CategoryInfo>>() {
+                            }.getType());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("categorys", (ArrayList<? extends Parcelable>) tcategoryInfos);
+                intent.putExtras(bundle);
+                SplashActivity.this.startActivity(intent);
+                SplashActivity.this.finish();
+            }
+        } else {
+            new Thread(() -> {
+                String url = "http://" + netValue.getIp() + ":" + netValue.getPort() + "/powercms/api/ContentApi-getCategoryInfo.action?userName=superuser&token=3dfcacea492d36be4a5b949e291823d9&returnType=json";
+                OkHttpClient client = new OkHttpClient();
+                final Request request = new Request.Builder()
+                        .url(url)
+                        .get()
+                        .build();
 
-            //同步加载
+                //同步加载
          /* try {
               Response response = client.newCall(request).execute();
               String json =  response.body().string();
@@ -189,49 +181,51 @@ public class SplashActivity extends Activity {
               e.printStackTrace();
           }*/
 
-            //异步加载
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Log.d("load", "onFailure: ");
-                }
+                //异步加载
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d("load", "onFailure: ");
+                    }
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    response = client.newCall(request).execute();
-                    json = response.body().string();
-                    boolean create = false;
-                    try {
-                        create = FileUtil.createFile(fileName);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    if (create) {
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        response = client.newCall(request).execute();
+                        String json = response.body().string();
+                        response.body().close();
+                        boolean create = false;
                         try {
-                            FileUtil.writeTxtFile(json, fileName);
+                            create = FileUtil.createFile(fileName);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    } else {
-                        try {
-                            FileUtil.deleteFile(filePath);
-                            FileUtil.createFile(fileName);
-                            FileUtil.writeTxtFile(json, fileName);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        if (create) {
+                            try {
+                                FileUtil.writeTxtFile(json, fileName);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            try {
+                                FileUtil.deleteFile(filePath);
+                                FileUtil.createFile(fileName);
+                                FileUtil.writeTxtFile(json, fileName);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
+                        initModel(json);
                     }
-                    initModel();
-                }
-            });
-        }).start();
+                });
+            }).start();
+        }
     }
 
-    public void initModel() {
+    public void initModel( String str) {
         Gson gson = new Gson();
-        tcategoryInfos = gson.fromJson(json, new TypeToken<List<CategoryInfo>>() {
+        tcategoryInfos = gson.fromJson(str, new TypeToken<List<CategoryInfo>>() {
         }.getType());
-        Intent intent = new Intent(SplashActivity.this, TabActivity.class);
+        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("categorys", (ArrayList<? extends Parcelable>) tcategoryInfos);
         intent.putExtras(bundle);
@@ -286,9 +280,4 @@ public class SplashActivity extends Activity {
         return cm.getActiveNetworkInfo();
     }
 
-    private void getSession() {
-        SharedPreferences setting = this.getSharedPreferences("User", 0);
-        user = new User(setting.getString("name", ""), setting.getString("password", ""));
-        isLogin = setting.getBoolean("isLogin", false);
-    }
 }

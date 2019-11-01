@@ -1,120 +1,273 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/player_bg"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
     tools:context=".activity.PlayerActivity">
+
+
+    <!--<TextView-->
+    <!--android:id="@+id/tv_speed"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content" />-->
 
     <RelativeLayout
         android:id="@+id/rl_player"
         android:layout_width="match_parent"
-        android:layout_weight="3"
-        android:layout_height="0dp">
+        android:layout_height="200dp"
+        android:background="@color/black">
 
         <include
             layout="@layout/simple_player_view_player"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent" />
 
         <master.flame.danmaku.ui.widget.DanmakuView
             android:id="@+id/danmaku_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="25dp" />
 
     </RelativeLayout>
 
-    <LinearLayout
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/content_ScrollView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="5"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:layout_below="@id/rl_player"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <!--标题-->
             <RelativeLayout
+                android:id="@+id/title1"
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="wrap_content"
+                android:layout_below="@id/rl_player">
+
                 <TextView
                     android:id="@+id/tv_content_title"
                     android:layout_width="wrap_content"
-                    android:layout_height="25dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginRight="10dp"
-                    android:textSize="18sp"
                     android:textColor="@color/black"
-                    android:textStyle="bold"/>
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_content_hits"
                     android:layout_width="wrap_content"
-                    android:layout_height="25dp"
+                    android:layout_height="wrap_content"
                     android:layout_below="@id/tv_content_title"
+                    android:layout_marginLeft="10dp"
                     android:paddingVertical="2dp"
-                    android:textSize="14sp"
-                    android:layout_marginLeft="10dp"/>
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tv_content_updateTime"
                     android:layout_width="wrap_content"
-                    android:layout_height="25dp"
+                    android:layout_height="wrap_content"
                     android:layout_below="@id/tv_content_title"
                     android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
                     android:paddingVertical="2dp"
-                    android:textSize="14sp"
-                    android:layout_marginRight="10dp"/>
+                    android:textSize="14sp" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_alignParentBottom="true"
-                    android:background="@color/blue_touch_user"/>
+                    android:background="@color/blue_touch_user" />
             </RelativeLayout>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_content_files"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"/>
-            <View
-                android:id="@+id/line_file"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_below="@+id/rv_content_files"
-                android:background="@color/gray"/>
-        </LinearLayout>
-
-        <ScrollView
-            android:id="@+id/sv_player"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
             <LinearLayout
+                android:id="@+id/title2"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/title1"
                 android:orientation="vertical">
-                <com.cec.videoplayer.view.MyListView
-                    android:id="@+id/lv_relate"
+
+                <RelativeLayout
+                    android:id="@+id/vr_relate_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:text="相关视频"
+                        android:textColor="@color/black"
+                        android:textSize="18dp" />
+
+                    <!--<Button-->
+                    <!--android:id="@+id/show_more_relate"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="25dp"-->
+                    <!--android:layout_alignParentRight="true"-->
+                    <!--android:layout_marginTop="20dp"-->
+                    <!--android:layout_marginEnd="20dp"-->
+                    <!--android:layout_marginBottom="0dp"-->
+                    <!--android:background="@drawable/button_shape2"-->
+                    <!--android:text="查看全部"-->
+                    <!--android:textColor="@color/text_color" />-->
+                </RelativeLayout>
+
+                <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:background="#D5D2D2"-->
+                <!--android:visibility="visible" />-->
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/relate_layout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_content_files"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
 
                 <View
-                    android:id="@+id/line_player"
+                    android:id="@+id/line_file"
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_below="@+id/lv_relate"
-                    android:visibility="gone"
-                    android:background="@color/gray"/>
+                    android:layout_height="1dp"
+                    android:layout_below="@+id/rv_content_files"
+                    android:background="@color/gray" />
 
-                <!--评论待添加-->
-                <com.cec.videoplayer.view.MyListView
-                    android:id="@+id/lv_comment"
+
+                <ListView
+                    android:id="@+id/lv_relate"
                     android:layout_width="match_parent"
-                    android:visibility="gone"
-                    android:layout_height="400dp"/>
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/listview_divider"
+                    android:dividerHeight="0.6dp" />
+
             </LinearLayout>
-        </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#B9B9B9" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible">
+
+
+                    <TextView
+                        android:id="@+id/comment_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp"
+                        android:text="精彩评论"
+                        android:textColor="@color/black"
+                        android:textSize="18dp" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/no_comment"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginTop="60dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:text="暂无内容，期待您的精彩评论" />
+            </LinearLayout>
+            <!--评论-->
+            <LinearLayout
+                android:id="@+id/detail_page_comment_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="75dp"
+                android:orientation="vertical">
+
+                <ListView
+                    android:id="@+id/detail_page_lv_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/listview_divider"
+                    android:dividerHeight="0.6dp"
+                    android:listSelector="@android:color/transparent"
+                    android:scrollbars="none"
+                    android:transcriptMode="alwaysScroll" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+    <!--底部-->
+    <LinearLayout
+        android:id="@+id/bottom_menu"
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/detail_page_do_comment"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="22dp"
+            android:layout_weight="1"
+            android:background="@drawable/comment_bt_selector"
+            android:gravity="center_vertical"
+            android:paddingLeft="18dp"
+            android:text="说点什么吧..."
+            android:textColor="#B6B6B6"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/locate_content_image"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:src="@drawable/icon_work_comment" />
+
+        <TextView
+            android:id="@+id/locate_content_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="20dp"
+            android:text="评论"
+            android:textColor="#9A9A9A"
+            android:textSize="14sp" />
+
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

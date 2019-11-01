@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -75,31 +76,41 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/background_gradient"
-            app:tabIndicatorColor="@color/limegreen"
+            app:tabIndicatorColor="@color/lawngreen"
             app:tabIndicatorHeight="4dp"
             app:tabMinWidth="0dp"
             app:tabMode="fixed"
             app:tabPaddingEnd="20dp"
             app:tabPaddingStart="20dp"
-            app:tabSelectedTextColor="@color/limegreen"
+            app:tabSelectedTextColor="@color/lawngreen"
             app:tabTextAppearance="@style/TabStyle"
-            app:tabTextColor="#59FFFFFF" />
+            app:tabTextColor="#EDF3F3F3" />
 
         <!--<ImageView-->
-            <!--android:id="@+id/all_menu"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_alignParentEnd="true"-->
-            <!--android:background="#E0E0E0"-->
-            <!--android:src="@mipmap/ic_menu" />-->
+        <!--android:id="@+id/all_menu"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:background="#E0E0E0"-->
+        <!--android:src="@mipmap/ic_menu" />-->
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/tab_viewpager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_margin="0dp"
         android:layout_weight="1"
-        android:background="@android:color/white" />
+        android:background="@android:color/white"
+        android:padding="0dp">
+
+    </android.support.v4.view.ViewPager>
 
 
 </LinearLayout><!--

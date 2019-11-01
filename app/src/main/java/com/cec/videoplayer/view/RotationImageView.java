@@ -1,6 +1,7 @@
 package com.cec.videoplayer.view;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.widget.ImageView;
@@ -11,7 +12,6 @@ import com.cec.videoplayer.adapter.PriorityVideoAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import android.os.Handler;
 
 public class RotationImageView {
     private Context mContext;
@@ -24,7 +24,7 @@ public class RotationImageView {
     private List<ImageView> mCircleImageViews;//存储小圆圈图片的view
 
 
-    int mIntervalMS;//播放间隔，单位ms
+    private int mIntervalMS;//播放间隔，单位ms
 
     //构造函数
     public RotationImageView(Context context, ViewPager viewPager, LinearLayout linearLayout, int intervalMS){

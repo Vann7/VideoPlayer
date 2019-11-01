@@ -36,7 +36,7 @@ public class TimeFormatUtil {
     private static String unitFormat(long i) {
         String retStr = null;
         if (i >= 0 && i < 10){
-            retStr = "0" + Long.toString(i);
+            retStr = "0" + i;
         }else{
             retStr = "" + i;
         }

@@ -1,9 +1,9 @@
 package com.cec.videoplayer.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,8 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.model.User;
-import com.cec.videoplayer.utils.ActivityManager;
+import com.cec.videoplayer.module.User;
 import com.cec.videoplayer.utils.CacheUtil;
 
 import java.lang.reflect.Field;
@@ -34,6 +33,12 @@ public class MineActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mine);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            View decorView = getWindow().getDecorView();
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(option);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
         getSession();
         initView();
         initEvent();
@@ -54,11 +59,11 @@ public class MineActivity extends AppCompatActivity implements View.OnClickListe
      * 初始化界面view
      */
     private void initView() {
-        logout_tv = (TextView) this.findViewById(R.id.mine_out_tv);
-        login_tv = (TextView) this.findViewById(R.id.mine_login_tv);
-        clearCache_rl = (RelativeLayout) this.findViewById(R.id.mine_clear_cache_rl);
-        cacheSize_tv = (TextView) this.findViewById(R.id.cache_size);
-        name_tv = (TextView) this.findViewById(R.id.mine_name_tv);
+        logout_tv = this.findViewById(R.id.mine_out_tv);
+        login_tv = this.findViewById(R.id.mine_login_tv);
+        clearCache_rl = this.findViewById(R.id.mine_clear_cache_rl);
+        cacheSize_tv = this.findViewById(R.id.cache_size);
+        name_tv = this.findViewById(R.id.mine_name_tv);
         back_iv = this.findViewById(R.id.mine_back);
         checkLogin();
 
@@ -96,17 +101,17 @@ public class MineActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.mine_out_tv :
+            case R.id.mine_out_tv:
                 logout();
                 break;
-            case R.id.mine_clear_cache_rl :
+            case R.id.mine_clear_cache_rl:
                 clean();
                 break;
-            case R.id.mine_login_tv :
+            case R.id.mine_login_tv:
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivityForResult(intent, 1);
                 break;
-            case R.id.mine_back :
+            case R.id.mine_back:
                 MineActivity.this.finish();
                 break;
         }
@@ -126,7 +131,7 @@ public class MineActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void getSession() {
         SharedPreferences setting = this.getSharedPreferences("User", 0);
-        user = new User(setting.getString("name",""),setting.getString("password",""));
+        user = new User(setting.getString("name", ""), setting.getString("password", ""));
         isLogin = setting.getBoolean("isLogin", false);
     }
 
@@ -135,7 +140,7 @@ public class MineActivity extends AppCompatActivity implements View.OnClickListe
      * 注销当前登录用户
      */
     public void logout() {
-        AlertDialog alertDialog = new AlertDialog.Builder(this,R.style.appalertdialog)
+        AlertDialog alertDialog = new AlertDialog.Builder(this, R.style.appalertdialog)
                 .setTitle("退出")
                 .setMessage("退出后不会删除当前账户信息")
                 .setPositiveButton("确定", (dialog, which) -> {
@@ -146,7 +151,7 @@ public class MineActivity extends AppCompatActivity implements View.OnClickListe
                     editor.commit();
                     isLogin = false;
                     Intent intent = new Intent(this, LoginActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent, 1);
                     checkLogin();
                 })
                 .setNegativeButton("取消", (dialog, which) -> {

@@ -39,7 +39,7 @@
     <color name="sync_btn_uncheck">#195ab1</color>
     <color name="edit_frame">#24a3ed</color>
     <color name="edit_content">#0a2d69</color>
-    <color name="cover_view">#b9000000</color>
+    <color name="cover_view">#4CAF50</color>
     <color name="transparent">#00000000</color>
     <color name="progress_bg">#a02b5283</color>
     <color name="bg_cover">#96323b46</color>
@@ -261,7 +261,7 @@
 
     <color name="slateblue">#6A5ACD</color><!--石蓝色 -->
 
-    <color name="dimgray">#696969</color><!--暗灰色 -->
+    <color name="dimgray">#3E8B8B8B</color><!--暗灰色 -->
 
     <color name="dimgrey">#696969</color><!--暗灰色 -->
 
@@ -324,6 +324,8 @@
 
     <color name="darkgreen">#006400</color><!--暗绿色 -->
 
+    <color name="button_green">#0AB454</color>
+
     <color name="blue">#0000FF</color><!--蓝色 -->
 
     <color name="mediumblue">#0000CD</color><!--中兰色 -->
@@ -333,4 +335,10 @@
     <color name="navy">#000080</color><!--海军色 -->
 
     <color name="black">#000000</color><!--黑色 -->
+
+    <color name="button_bg">#F3D5D4D4</color>
+
+    <color name="sub_transparent">#925A5959</color>
+
+    <color name="main_bg">#140E0E</color>
 </resources>

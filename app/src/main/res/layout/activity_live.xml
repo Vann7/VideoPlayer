@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.cec.videoplayer.activity.LiveActivity">
+
+
+
+    <include
+        layout="@layout/live_player_view_player"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 顶部栏-->
+    <include layout="@layout/live_simple_player_topbar" />
+
+    <LinearLayout
+        android:id="@+id/live_detail_page_comment_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/transparent"
+        android:orientation="vertical">
+
+        <ListView
+            android:id="@+id/live_detail_page_lv_comment"
+            android:layout_width="250dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="10dp"
+            android:divider="@color/transparent"
+            android:dividerHeight="10dp"
+            android:listSelector="@android:color/transparent"
+            android:scrollbars="none"
+            android:transcriptMode="alwaysScroll" />
+
+
+        <!--底部-->
+        <LinearLayout
+            android:id="@+id/live_bottom_menu"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:background="@android:color/transparent"
+            android:elevation="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/live_detail_page_do_comment"
+                android:layout_width="180dp"
+                android:layout_height="34dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="22dp"
+                android:background="@drawable/live_comment_bt_selector"
+                android:gravity="center_vertical"
+                android:paddingLeft="18dp"
+                android:text="说点什么吧..."
+                android:textColor="#B6B6B6"
+                android:textSize="12sp" />
+
+            <!--<ImageView-->
+            <!--android:id="@+id/live_locate_content_image"-->
+            <!--android:layout_width="26dp"-->
+            <!--android:layout_height="26dp"-->
+            <!--android:src="@drawable/icon_work_comment" />-->
+
+            <TextView
+                android:id="@+id/live_locate_content_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:textColor="#9A9A9A"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

@@ -3,6 +3,7 @@ package com.cec.videoplayer.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -14,25 +15,27 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ScrollView;
+import android.widget.Toast;
 
 import com.cec.videoplayer.R;
-
 import com.cec.videoplayer.adapter.VideoListAdapter;
+import com.cec.videoplayer.module.User;
 import com.cec.videoplayer.module.CategoryInfo;
 import com.cec.videoplayer.module.ContentInfo;
+import com.cec.videoplayer.module.PlayUrl;
 import com.cec.videoplayer.module.VideoInfo;
-import com.cec.videoplayer.service.NetService;
+import com.cec.videoplayer.module.NetValue;
+import com.cec.videoplayer.view.VideoListGridView;
+import com.cec.videoplayer.view.VideoScrollView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshGridView;
+import com.cec.videoplayer.view.PullToRefreshBase;
+import com.cec.videoplayer.view.PullToRefreshScrollView;
 import com.tangguna.searchbox.library.cache.HistoryCache;
 import com.tangguna.searchbox.library.callback.onSearchCallBackListener;
 import com.tangguna.searchbox.library.widget.SearchListLayout;
@@ -41,6 +44,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import okhttp3.Call;
@@ -50,19 +54,22 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class SearchActivity extends AppCompatActivity {
+    private User user;
     private SearchListLayout searchLayout;
     private TabLayout tabLayout = null;
     private ViewPager vp_pager;
     private List<CategoryInfo> mList = new ArrayList<>();
     private MorePagerAdapter mAdapter = new MorePagerAdapter();
-    private NetService netService = new NetService();
+    private NetValue netValue = new NetValue();
     private String keyWord;
     private LinearLayout noResultLayout;
-    private LinearLayout netErrorLayout;
     private LinearLayout historyLayout;
     private ViewPager viewPager;
     private ContentInfo contentInfo;
-    private int net = 0;
+    private HashMap<String, VideoScrollView> mScrollViews = new HashMap<>();
+    private Boolean isLogin;
+    private String memberName = "";
+    private List<PlayUrl> playUrls = new ArrayList<>();
 
 
     @Override
@@ -72,7 +79,6 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.search_main);
         searchLayout = findViewById(R.id.searchlayout);
         noResultLayout = findViewById(R.id.no_search_result);
-        netErrorLayout = findViewById(R.id.net_error_layout);
         historyLayout = (LinearLayout) findViewById(R.id.history_list);
         viewPager = findViewById(R.id.search_tab_viewpager);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -128,19 +134,18 @@ public class SearchActivity extends AppCompatActivity {
                 noResultLayout.setVisibility(View.GONE);
                 viewPager.setVisibility(View.VISIBLE);
                 historyLayout.setVisibility(View.GONE);
-                MorePagerAdapter morePagerAdapter = new MorePagerAdapter();
-                if (!morePagerAdapter.isNetworkAvailable(SearchActivity.this)) {
-                    netErrorLayout.setVisibility(View.VISIBLE);
-                    viewPager.setVisibility(View.GONE);
-                    TextView textView = findViewById(R.id.net_error_text);
-                    textView.setText("无网络连接" + "\n" + "请检查网络设置！");
-                } else {
-                    //进行或联网搜索
-                    keyWord = str;
-                    tabLayout.setTabMode(TabLayout.MODE_FIXED);
-                    vp_pager.setAdapter(mAdapter);
-                    tabLayout.setupWithViewPager(vp_pager);
+                try {
+                    String utf8Str = URLEncoder.encode(str, "UTF-8");
+                    utf8Str = URLEncoder.encode(utf8Str, "UTF-8");
+                    keyWord = utf8Str;
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
+
+
+                tabLayout.setTabMode(TabLayout.MODE_FIXED);
+                vp_pager.setAdapter(mAdapter);
+                tabLayout.setupWithViewPager(vp_pager);
             }
 
             @Override
@@ -183,64 +188,39 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             //判断当前是否存在gridview
-            PullToRefreshGridView gridView = null;
-            VideoListAdapter videoListAdapter = null;
-            List<VideoInfo> videoList = null;
-            LinearLayout layout = null;
+            VideoScrollView scrollView = null;
             for (int i = 0; i < container.getChildCount(); ++i) {
-                layout = (LinearLayout) container.getChildAt(i);
-                if (layout.getChildAt(0).getId() == position) {
-                    gridView = (PullToRefreshGridView) layout.getChildAt(0);
+                if (container.getChildAt(i).getId() == position) {
+                    scrollView = mScrollViews.get(position + "");
                     break;
-                } else {
-                    layout = null;
                 }
             }
-            if (gridView == null) {
-                layout = new LinearLayout(SearchActivity.this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                layout.setLayoutParams(layoutParams);
-
-                gridView = new PullToRefreshGridView(SearchActivity.this);
-                gridView.setId(position);
-                setVideoGridViewStyle(gridView);
-                gridView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<GridView>() {
+            if (scrollView == null) {
+                scrollView = new VideoScrollView(SearchActivity.this);
+                mScrollViews.put(position + "", scrollView);
+                scrollView.initScrollView();
+                scrollView.initScrollViewChildren();
+                scrollView.getmScrollView().setId(position);
+                scrollView.getmScrollView().setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ScrollView>() {
                     @Override
-                    public void onPullDownToRefresh(PullToRefreshBase<GridView> refreshView) {
-                        ((VideoListAdapter) (refreshView.getRefreshableView().getAdapter())).clear();
-
-                        getVideoListByKeyword((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter(), keyWord);
-
+                    public void onPullDownToRefresh(PullToRefreshBase<ScrollView> refreshView) {
+                        ((VideoListAdapter) ((VideoListGridView) ((LinearLayout) refreshView.getRefreshableView().getChildAt(0)).getChildAt(2)).getAdapter()).clear();
+                        getVideoListByKeyword((PullToRefreshScrollView) refreshView, (VideoListAdapter) ((VideoListGridView) ((LinearLayout) refreshView.getRefreshableView().getChildAt(0)).getChildAt(2)).getAdapter(), keyWord);
                     }
 
                     @Override
-                    public void onPullUpToRefresh(PullToRefreshBase<GridView> refreshView) {
-
-                        getVideoListByKeyword((PullToRefreshGridView) refreshView, (VideoListAdapter) refreshView.getRefreshableView().getAdapter(), keyWord);
-
+                    public void onPullUpToRefresh(PullToRefreshBase<ScrollView> refreshView) {
+//                        getVideoListByKeyword((PullToRefreshScrollView) refreshView, (VideoListAdapter) ((VideoListGridView) ((LinearLayout) refreshView.getRefreshableView().getChildAt(0)).getChildAt(2)).getAdapter(), keyWord);
+                        ((VideoListAdapter) ((VideoListGridView) ((LinearLayout) refreshView.getRefreshableView().getChildAt(0)).getChildAt(2)).getAdapter()).clear();
+                        getVideoListByKeyword((PullToRefreshScrollView) refreshView, (VideoListAdapter) ((VideoListGridView) ((LinearLayout) refreshView.getRefreshableView().getChildAt(0)).getChildAt(2)).getAdapter(), keyWord);
                     }
                 });
-                gridView.setOnItemClickListener((parent, v, positions, id) -> {
-                    if (!isNetworkAvailable(SearchActivity.this)) {
-                        if (isWifi(SearchActivity.this)) {
-                            net = 1;
-                            Intent intent = new Intent(SearchActivity.this, NoNetworkActivity.class);
-                            intent.putExtra("netType", net);
-                            startActivity(intent);
-                        } else if (isMobile(SearchActivity.this)) {
-                            net = 2;
-                            Intent intent = new Intent(SearchActivity.this, NoNetworkActivity.class);
-                            intent.putExtra("netType", net);
-                            startActivity(intent);
-                        } else {
-                            Intent intent = new Intent(SearchActivity.this, NoNetworkActivity.class);
-                            startActivity(intent);
-                        }
-                    } else {
-                        VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
-                        String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
-                                "?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&size=10&" +
+                scrollView.getmVideoListGridView().setOnItemClickListener((parent, v, positions, id) -> {
+                    getSession();
+                    VideoInfo videoInfo = (VideoInfo) parent.getAdapter().getItem(positions);
+                    if (videoInfo.getLimit() == 0) {
+                        String url = "http://" + netValue.getIp() + ":" + netValue.getPort() + "/powercms/api/ContentApi-getContentInfo.action" +
+                                "?userName=superuser&token=3dfcacea492d36be4a5b949e291823d9&returnType=json&size=10&" +
                                 "contentId=" + videoInfo.getId();
 
                         new Thread(() -> {
@@ -260,63 +240,81 @@ public class SearchActivity extends AppCompatActivity {
                                 @Override
                                 public void onResponse(Call call, Response response) throws IOException {
                                     response = client.newCall(request).execute();
-                                    String json = response.body().string();
+                                    String contentInfoStr = response.body().string();
+                                    response.body().close();
                                     Gson gson = new Gson();
-                                    List<ContentInfo> infos = gson.fromJson(json, new TypeToken<List<ContentInfo>>() {
+                                    List<ContentInfo> infos = gson.fromJson(contentInfoStr, new TypeToken<List<ContentInfo>>() {
                                     }.getType());
                                     contentInfo = infos.get(0);
-                                    if (contentInfo.getVideo360() == 1) {
-                                        Intent playIntent = new Intent(SearchActivity.this, SimpleVrVideoActivity.class);
+                                    //直播
+                                    if (videoInfo.getFileattr().equals("0")) {
+                                        Intent playIntent = new Intent(SearchActivity.this, LiveActivity.class);
                                         Bundle bundle = new Bundle();
-                                        bundle.putString("id", contentInfo.getId());
-                                        playIntent.putExtras(bundle);
-                                        startActivity(playIntent);
-                                    } else {
-                                        Intent playIntent = new Intent(SearchActivity.this, PlayerActivity.class);
-                                        Bundle bundle = new Bundle();
-                                        bundle.putString("url", videoInfo.getPlayurl());
+                                        bundle.putString("contentInfoStr", contentInfoStr);
                                         bundle.putString("id", videoInfo.getId());
+                                        bundle.putString("url", videoInfo.getAddress());
                                         playIntent.putExtras(bundle);
                                         startActivity(playIntent);
                                     }
+                                    //点播
+                                    else {
+                                        if (contentInfo.getVideo360() == 1) {
+                                            Intent playIntent = new Intent(SearchActivity.this, VrVideoActivity.class);
+                                            Bundle bundle = new Bundle();
+                                            bundle.putString("id", contentInfo.getId());
+                                            bundle.putString("contentInfoStr", contentInfoStr);
+                                            playIntent.putExtras(bundle);
+                                            startActivity(playIntent);
+                                        } else {
+                                            Intent playIntent = new Intent(SearchActivity.this, PlayerActivity.class);
+                                            Bundle bundle = new Bundle();
+                                            bundle.putString("contentInfoStr", contentInfoStr);
+                                            bundle.putString("id", videoInfo.getId());
+                                            playIntent.putExtras(bundle);
+                                            startActivity(playIntent);
+                                        }
+                                    }
                                 }
+
                             });
                         }).start();
+                    } else {
+                        if (isLogin) {
+                            Toast.makeText(SearchActivity.this, "当前用户无权限访问该内容。", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(SearchActivity.this, "请先登录。", Toast.LENGTH_LONG).show();
+                            Intent intent = new Intent(SearchActivity.this, MineActivity.class);
+                            startActivity(intent);
+                        }
                     }
+
                 });
-                videoList = new ArrayList<VideoInfo>();
-                videoListAdapter = new VideoListAdapter(SearchActivity.this, R.layout.video_item, videoList);
-                gridView.setAdapter(videoListAdapter);
-
-                layout.addView(gridView);
-                container.addView(layout);
+                container.addView(scrollView.getmScrollView());
             }
-            ((VideoListAdapter) gridView.getRefreshableView().getAdapter()).clear();
+            ((VideoListAdapter) scrollView.getmVideoListGridView().getAdapter()).clear();
+            scrollView.getmRotationImageView().getmPriorityAdapter().getmList().clear();
+            scrollView.getmRotationImageView().getmPriorityAdapter().notifyDataSetChanged();
+            scrollView.getmRotationImageView().getmHandler().removeMessages(0);
+            if (!isNetworkAvailable(SearchActivity.this)) {
+                scrollView.getmLinearLayout().getChildAt(1).setVisibility(View.GONE);
+                scrollView.getmLinearLayout().getChildAt(2).setVisibility(View.GONE);
+                scrollView.getmLinearLayout().getChildAt(3).setVisibility(View.VISIBLE);
+                ((LinearLayout) (scrollView.getmLinearLayout().getChildAt(3))).getChildAt(2).setOnClickListener(v -> instantiateItem(container, position));
+            } else {
+                scrollView.getmLinearLayout().getChildAt(1).setVisibility(View.GONE);
+                scrollView.getmLinearLayout().getChildAt(2).setVisibility(View.VISIBLE);
+                scrollView.getmLinearLayout().getChildAt(3).setVisibility(View.GONE);
+                getVideoListByKeyword(scrollView.getmScrollView(), scrollView.getmVideoListAdapter(), keyWord);
+            }
 
-            getVideoListByKeyword(gridView, (VideoListAdapter) gridView.getRefreshableView().getAdapter(), keyWord);
-
-            return layout;
+            return scrollView.getmScrollView();
         }
 
-        //设置视频列表的样式
-        public void setVideoGridViewStyle(PullToRefreshGridView view) {
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(10, 10, 10, 0);
-            view.setLayoutParams(layoutParams);
-            view.setGravity(Gravity.CENTER);
-            view.getRefreshableView().setHorizontalSpacing(10);
-            view.getRefreshableView().setVerticalSpacing(5);
-            view.getRefreshableView().setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
-            view.getRefreshableView().setNumColumns(2);
-            view.setMode(PullToRefreshBase.Mode.BOTH);
-        }
-
-        //根据檢索內容获取视频列表
-        public void getVideoListByKeyword(PullToRefreshGridView gridView, VideoListAdapter adapter, String keyWord) {
+        //根据检索內容获取视频列表
+        public void getVideoListByKeyword(PullToRefreshScrollView scrollView, VideoListAdapter adapter, String keyWord) {
             new Thread(() -> {
-                String url = "http://" + netService.getIp() + ":" + netService.getPort() + "/powercms/api/ContentApi-searchContent.action?userName=demo1&token=f620969ebe7a0634c0aabc1b4fecf1ab&returnType=json&siteId="
-                        + netService.getSiteId() + "&keyword=" + keyWord;
-                String s = url;
+                String url = "http://" + netValue.getIp() + ":" + netValue.getPort() + "/powercms/api/ContentApi-searchContent.action?userName=superuser&token=3dfcacea492d36be4a5b949e291823d9&returnType=json&siteId="
+                        + netValue.getSiteId() + "&keyword=" + keyWord + "&memberName=" + memberName;
                 OkHttpClient client = new OkHttpClient();
                 final Request request = new Request.Builder()
                         .url(url)
@@ -333,7 +331,7 @@ public class SearchActivity extends AppCompatActivity {
                     public void onResponse(Call call, Response response) throws IOException {
                         response = client.newCall(request).execute();
                         //将视频信息json转成类对象
-                        convertVideoFromJson(response.body().string(), gridView, adapter);
+                        convertVideoFromJson(response.body().string(), scrollView, adapter);
                         response.body().close();
                     }
                 });
@@ -341,7 +339,7 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         //将视频列表由json格式转换成类数组
-        public void convertVideoFromJson(String json, PullToRefreshGridView gridView, VideoListAdapter adapter) {
+        public void convertVideoFromJson(String json, PullToRefreshScrollView scrollView, VideoListAdapter adapter) {
             Gson gson = new Gson();
             List<VideoInfo> videoInfoList = gson.fromJson(json, new TypeToken<List<VideoInfo>>() {
             }.getType());
@@ -354,7 +352,7 @@ public class SearchActivity extends AppCompatActivity {
                     viewPager.setVisibility(View.GONE);
                     noResultLayout.setVisibility(View.VISIBLE);
                 }
-                gridView.onRefreshComplete();
+                scrollView.onRefreshComplete();
             });
         }
 
@@ -422,4 +420,15 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 获取当前用户session信息
+     */
+    private void getSession() {
+        SharedPreferences setting = this.getSharedPreferences("User", 0);
+        user = new User(setting.getString("name", ""), setting.getString("password", ""));
+        isLogin = setting.getBoolean("isLogin", false);
+        if (isLogin) {
+            memberName = user.getName();
+        }
+    }
 }

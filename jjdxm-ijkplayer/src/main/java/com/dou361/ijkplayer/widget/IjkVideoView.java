@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -1078,4 +1079,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             }
         }
     }
+
+    /**
+     * 截图
+     */
+    public Bitmap getShotCut(){
+        return mRenderView instanceof TextureRenderView?((TextureRenderView)mRenderView).getBitmap():null;
+    }
+
 }

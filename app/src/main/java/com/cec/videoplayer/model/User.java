@@ -1,4 +1,4 @@
-package com.cec.videoplayer.model;
+package com.cec.videoplayer.module;
 
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;
@@ -13,7 +13,6 @@ public class User extends LitePalSupport implements Serializable {
     @Column(nullable = false)
     private String name;
     private String password;
-    private String token; // 用户凭据
 
     public User(){}
 
@@ -25,7 +24,6 @@ public class User extends LitePalSupport implements Serializable {
     public User(String name, String password, String token) {
         this.name = name;
         this.password = password;
-        this.token = token;
     }
 
     @Override
@@ -59,13 +57,5 @@ public class User extends LitePalSupport implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 }

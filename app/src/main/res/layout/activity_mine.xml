@@ -6,8 +6,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:background="@color/topbar">
+        android:layout_height="100dp"
+        android:background="@drawable/background_gradient">
 
         <ImageView
             android:id="@+id/mine_back"
@@ -20,7 +20,7 @@
         <TextView
             android:id="@+id/mine_header_tv"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="100dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:text="@string/home_mine"
@@ -62,8 +62,7 @@
             android:gravity="center_vertical"
             android:layout_alignParentRight="true"
             android:textSize="18dp"
-            android:layout_marginRight="20dp"
-            android:text="管理员"/>
+            android:layout_marginRight="20dp"/>
     </RelativeLayout>
 
     <RelativeLayout
