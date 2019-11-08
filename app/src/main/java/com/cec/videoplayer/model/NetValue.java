@@ -1,4 +1,4 @@
-package com.cec.videoplayer.module;
+package com.cec.videoplayer.model;
 
 public class NetValue {
     private String siteId;

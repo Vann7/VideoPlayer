@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.module.File;
+import com.cec.videoplayer.model.File;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.ViewHolder> 
         this.thisPosition = thisPosition;
     }
 
-    public FilesAdapter(RecyclerView recyclerview, Context context, List<com.cec.videoplayer.module.File> list) {
+    public FilesAdapter(RecyclerView recyclerview, Context context, List<com.cec.videoplayer.model.File> list) {
         mInflater = LayoutInflater.from(context);
         this.mList = list;
         this.rv_content = recyclerview;

@@ -27,10 +27,10 @@ import android.widget.Toast;
 
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.adapter.LiveCommentAdapter;
-import com.cec.videoplayer.module.Comment;
-import com.cec.videoplayer.module.ContentInfo;
-import com.cec.videoplayer.module.NetValue;
-import com.cec.videoplayer.module.User;
+import com.cec.videoplayer.model.Comment;
+import com.cec.videoplayer.model.ContentInfo;
+import com.cec.videoplayer.model.NetValue;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.utils.ToastUtils;
 import com.cec.videoplayer.view.LivePlayerView;
 import com.google.gson.Gson;

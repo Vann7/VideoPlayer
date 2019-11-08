@@ -9,7 +9,7 @@ import android.widget.ListView;
 
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.holder.LiveCommentHolder;
-import com.cec.videoplayer.module.Comment;
+import com.cec.videoplayer.model.Comment;
 
 import java.util.List;
 

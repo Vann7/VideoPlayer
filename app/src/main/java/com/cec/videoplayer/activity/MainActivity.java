@@ -31,12 +31,12 @@ import android.widget.Toast;
 
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.adapter.VideoListAdapter;
-import com.cec.videoplayer.module.User;
-import com.cec.videoplayer.module.CategoryInfo;
-import com.cec.videoplayer.module.ContentInfo;
-import com.cec.videoplayer.module.PagingVideoInfo;
-import com.cec.videoplayer.module.VideoInfo;
-import com.cec.videoplayer.module.NetValue;
+import com.cec.videoplayer.model.User;
+import com.cec.videoplayer.model.CategoryInfo;
+import com.cec.videoplayer.model.ContentInfo;
+import com.cec.videoplayer.model.PagingVideoInfo;
+import com.cec.videoplayer.model.VideoInfo;
+import com.cec.videoplayer.model.NetValue;
 import com.cec.videoplayer.utils.FileUtil;
 import com.cec.videoplayer.utils.NetWorkSpeedUtils;
 import com.cec.videoplayer.view.RotationImageView;

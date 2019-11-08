@@ -13,7 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.module.User;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.utils.CacheUtil;
 
 import java.lang.reflect.Field;

@@ -19,8 +19,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.module.CategoryInfo;
-import com.cec.videoplayer.module.NetValue;
+import com.cec.videoplayer.model.CategoryInfo;
+import com.cec.videoplayer.model.NetValue;
 import com.cec.videoplayer.utils.FileUtil;
 import com.cec.videoplayer.utils.PermissionUtils;
 import com.google.gson.Gson;

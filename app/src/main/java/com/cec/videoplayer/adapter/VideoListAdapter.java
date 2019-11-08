@@ -9,8 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.module.NetValue;
-import com.cec.videoplayer.module.VideoInfo;
+import com.cec.videoplayer.model.NetValue;
+import com.cec.videoplayer.model.VideoInfo;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -59,6 +59,7 @@ public class VideoListAdapter extends ArrayAdapter<VideoInfo> {
         Picasso.with(getContext()).load("http://" + netValue.getIp() + ":" + netValue.getPort() + "/powercms/" + video.getImage()).into(videoHolder.videoImage);
         return view;
     }
+
 
     class VideoHolder {
         ImageView videoImage;

@@ -6,8 +6,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.module.Comment;
-import com.cec.videoplayer.module.Relate;
+import com.cec.videoplayer.model.Comment;
+import com.cec.videoplayer.model.Relate;
 import com.squareup.picasso.Picasso;
 
 import java.io.UnsupportedEncodingException;

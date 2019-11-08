@@ -1,4 +1,4 @@
-package com.cec.videoplayer.module;
+package com.cec.videoplayer.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

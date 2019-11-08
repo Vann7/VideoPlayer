@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 import com.cec.videoplayer.R;
 import com.cec.videoplayer.adapter.VideoListAdapter;
-import com.cec.videoplayer.module.VideoInfo;
+import com.cec.videoplayer.model.VideoInfo;
 
 import java.util.ArrayList;
 import java.util.List;

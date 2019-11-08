@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.ActivityCompat;
@@ -49,12 +50,12 @@ import com.cec.videoplayer.R;
 import com.cec.videoplayer.adapter.CommentAdapter;
 import com.cec.videoplayer.adapter.FilesAdapter;
 import com.cec.videoplayer.adapter.RelateAdapter;
-import com.cec.videoplayer.module.Comment;
-import com.cec.videoplayer.module.ContentInfo;
-import com.cec.videoplayer.module.NetValue;
-import com.cec.videoplayer.module.PlayUrl;
-import com.cec.videoplayer.module.Relate;
-import com.cec.videoplayer.module.User;
+import com.cec.videoplayer.model.ContentInfo;
+import com.cec.videoplayer.model.PlayUrl;
+import com.cec.videoplayer.model.Comment;
+import com.cec.videoplayer.model.NetValue;
+import com.cec.videoplayer.model.Relate;
+import com.cec.videoplayer.model.User;
 import com.cec.videoplayer.utils.MediaUtils;
 import com.cec.videoplayer.utils.NetWorkSpeedUtils;
 import com.cec.videoplayer.utils.PlayHitstUtil;
@@ -201,6 +202,14 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         mScreenOrientation = new OrientationEventListener(this.mContext, SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int orientation) {
+                try {
+                    int screenChange = Settings.System.getInt(PlayerActivity.this.getContentResolver(), Settings.System.ACCELEROMETER_ROTATION);
+                    if (screenChange == 0) {
+                        return;
+                    }
+                } catch (Settings.SettingNotFoundException e) {
+                    e.printStackTrace();
+                }
                 if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
                     return;
                 }
@@ -311,7 +320,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         rv_content_files.setLayoutManager(layoutManager);
-        List<com.cec.videoplayer.module.File> files = new ArrayList<>();
+        List<com.cec.videoplayer.model.File> files = new ArrayList<>();
         mAdapter = new FilesAdapter(rv_content_files, this, files);
         rv_content_files.setAdapter(mAdapter);
         rv_content_files.setVisibility(View.GONE);

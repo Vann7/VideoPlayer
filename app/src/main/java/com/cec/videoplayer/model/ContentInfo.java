@@ -1,4 +1,4 @@
-package com.cec.videoplayer.module;
+package com.cec.videoplayer.model;
 
 import java.util.List;
 
@@ -21,8 +21,8 @@ public class ContentInfo {
     private String href;
     private int weekHits;
     private String cateId;
-    private List<File> files;
-    private List<Relate> relates;
+    private List<com.cec.videoplayer.model.File> files;
+    private List<com.cec.videoplayer.model.Relate> relates;
 
 
     @Override
@@ -141,19 +141,19 @@ public class ContentInfo {
         this.cateId = cateId;
     }
 
-    public List<File> getFiles() {
+    public List<com.cec.videoplayer.model.File> getFiles() {
         return files;
     }
 
-    public void setFiles(List<File> files) {
+    public void setFiles(List<com.cec.videoplayer.model.File> files) {
         this.files = files;
     }
 
-    public List<Relate> getRelates() {
+    public List<com.cec.videoplayer.model.Relate> getRelates() {
         return relates;
     }
 
-    public void setRelates(List<Relate> relates) {
+    public void setRelates(List<com.cec.videoplayer.model.Relate> relates) {
         this.relates = relates;
     }
 

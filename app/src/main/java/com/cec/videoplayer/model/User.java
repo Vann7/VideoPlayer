@@ -1,4 +1,4 @@
-package com.cec.videoplayer.module;
+package com.cec.videoplayer.model;
 
 import org.litepal.annotation.Column;
 import org.litepal.crud.LitePalSupport;

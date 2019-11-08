@@ -12,9 +12,9 @@ import android.widget.Toast;
 
 import com.cec.videoplayer.activity.PlayerActivity;
 import com.cec.videoplayer.activity.VrVideoActivity;
-import com.cec.videoplayer.module.ContentInfo;
-import com.cec.videoplayer.module.VideoInfo;
-import com.cec.videoplayer.module.NetValue;
+import com.cec.videoplayer.model.ContentInfo;
+import com.cec.videoplayer.model.VideoInfo;
+import com.cec.videoplayer.model.NetValue;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;

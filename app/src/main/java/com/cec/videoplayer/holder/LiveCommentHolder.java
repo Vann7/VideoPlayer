@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.cec.videoplayer.R;
-import com.cec.videoplayer.module.Comment;
+import com.cec.videoplayer.model.Comment;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
